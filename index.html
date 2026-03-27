@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Femmes en Colère (Abrégé) - Le Président</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #1a1a2e, #c1121f, #1a1a2e);
+            min-height: 100vh;
+        }
+        
+        /* Exception pour les contrôles mobiles qui doivent pouvoir défiler horizontalement */
+        .mobile-controls {
+            overflow-x: auto !important;
+        }
+        
+        /* Styles pour mobile */
+        @media (max-width: 768px) {
+            .mobile-tap-area {
+                min-height: 40px;
+                min-width: 40px;
+            }
+            
+            .text-display {
+                font-size: 1.1rem;
+                line-height: 1.6;
+            }
+            
+            .mobile-controls {
+                padding: 6px;
+                gap: 4px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-x;
+            }
+            
+            .mobile-controls::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .mobile-controls {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            
+            /* Assurer la visibilité des icônes sur mobile */
+            .mobile-controls svg {
+                width: 19px;
+                height: 19px;
+                display: block;
+                flex-shrink: 0;
+            }
+            
+            .control-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 40px;
+                min-height: 40px;
+            }
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div id="root"></div>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const RotateCcwIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>);
+        const SkipBackIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>);
+        const SkipForwardIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>);
+        const ZapIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>);
+        const SettingsIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6m-6-6h6m6 0h-6"></path></svg>);
+        const Volume2Icon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>);
+        const EyeIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>);
+        const EyeOffIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>);
+        const BookmarkIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>);
+        const BookmarkFilledIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>);
+        const ListIcon = () => (<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line></svg>);
+
+        const FemmesRehearsal = () => {
+            const [currentSection, setCurrentSection] = useState(0);
+            const [currentLine, setCurrentLine] = useState(0);
+            const [showSettings, setShowSettings] = useState(false);
+            const [voices, setVoices] = useState([]);
+            const [selectedVoices, setSelectedVoices] = useState({});
+            const [speechRate, setSpeechRate] = useState(1.15);
+            const [commaPause, setCommaPause] = useState(0.25);
+            const [sentencePause, setSentencePause] = useState(0.75);
+            const [revealedLine, setRevealedLine] = useState(false);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [turboMode, setTurboMode] = useState(false);
+            const [showPrompter, setShowPrompter] = useState(false);
+            const [prompterDelay, setPrompterDelay] = useState(3); // secondes avant révélation (1-9)
+            const [prompterTimer, setPrompterTimer] = useState(3); // compteur actuel
+            const [prompterState, setPrompterState] = useState('hidden'); // 'hidden', 'hint', 'full', 'audio'
+            const [showBookmarks, setShowBookmarks] = useState(false);
+            const [bookmarks, setBookmarks] = useState({});
+            const [touchStartX, setTouchStartX] = useState(null);
+            const [showSwipeHint, setShowSwipeHint] = useState(false);
+            const utteranceRef = useRef(null);
+            const rootRef = useRef(null);
+            const [presidentSpeechState, setPresidentSpeechState] = useState('idle'); // 'idle', 'playing', 'paused'
+            const presidentChunksRef = useRef(null);
+            const presidentChunkIndexRef = useRef(0);
+            const presidentTimeoutRef = useRef(null);
+            const presidentSpeechOptsRef = useRef(null);
+            const [selectedRole, setSelectedRole] = useState('Le Président');
+
+            // Charger les paramètres sauvegardés
+            useEffect(() => {
+                const savedSettings = localStorage.getItem('femmesTRAE_settings');
+                if (savedSettings) {
+                    const settings = JSON.parse(savedSettings);
+                    setSpeechRate(settings.speechRate || 1.15);
+                    setCommaPause(settings.commaPause || 0.25);
+                    setSentencePause(settings.sentencePause || 0.75);
+                    setSelectedVoices(settings.selectedVoices || {});
+                    setShowPrompter(settings.showPrompter || false);
+                    setPrompterDelay(settings.prompterDelay || 3);
+                    if (settings.selectedRole) setSelectedRole(settings.selectedRole);
+                }
+
+                // Charger les marque-pages sauvegardés
+                const savedBookmarks = localStorage.getItem('femmesTRAE_bookmarks');
+                if (savedBookmarks) {
+                    setBookmarks(JSON.parse(savedBookmarks));
+                }
+
+                // Charger les paramètres du souffleur
+                const savedPrompter = localStorage.getItem('femmesTRAE_prompter');
+                if (savedPrompter) {
+                    const prompterSettings = JSON.parse(savedPrompter);
+                    setPrompterTimer(prompterSettings.timer || 3);
+                }
+
+                // Vérifier si l'indicateur de swipe a déjà été vu
+                const swipeHintSeen = localStorage.getItem('femmesTRAE_swipeHintSeen');
+                if (!swipeHintSeen) {
+                    setShowSwipeHint(true);
+                }
+            }, []);
+
+            // Sauvegarder les paramètres
+            const saveSettings = () => {
+                const settings = {
+                    speechRate,
+                    commaPause,
+                    sentencePause,
+                    selectedVoices,
+                    showPrompter,
+                    prompterDelay,
+                    selectedRole
+                };
+                localStorage.setItem('femmesTRAE_settings', JSON.stringify(settings));
+            };
+
+            // Sauvegarder les marque-pages
+            const saveBookmarks = () => {
+                localStorage.setItem('femmesTRAE_bookmarks', JSON.stringify(bookmarks));
+            };
+
+            // Sauvegarder les paramètres du souffleur
+            const savePrompterSettings = () => {
+                const prompterSettings = {
+                    timer: prompterTimer
+                };
+                localStorage.setItem('femmesTRAE_prompter', JSON.stringify(prompterSettings));
+            };
+
+            const sections = [
+    {
+      title: "A 1",
+      lines: [
+        { character: "Brouhaha en voix off", text: "20 ans - 20 ans - 20 ans", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "20 ans ! L’avocat général, du haut de son estrade, a réclamé 20 ans.Et comme si ça ne suffisait pas, il a ajouté “assorti d’une peine de sûreté de 12 ans”", gender: "female", isPresident: false },
+        { character: "L’ Avocat Général", text: "Ce procès est avant tout le procès de la barbarie.", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "20 ans ! Son réquisitoire a peut-être duré, quoi, 45 minutes ? Ça fait combien de jours de prison par minute, ça ? Alors, 20 fois 365, ça fait… 7 300 jours. “Mathilde, pour réussir ta vie, il faut savoir compter vite et juste.” Il serait content, mon père. J’ai bien réussi ma vie. Alors, 7 300 jours divisés par 45 minutes, ça fait à peu près…160 jours. Ah oui, un peu plus de 5 mois de prison par minute de réquisitoire. Ça va, c’est bien payé !", gender: "female", isPresident: false },
+        { character: "L’ Avocat Général", text: "Cette femme n’appartient plus à notre civilisation. Elle s’en est exclue.", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "20 ans. J’ai peur. Pour la première fois depuis l’agression, j’ai peur. Pourtant, j’ai pas tremblé quand il a fallu régler le compte à ces deux salopards. Et puis,mise en examen, détention provisoire, le tout sans trembler. Ils n’ont eu que ce qu’ils méritaient.Mais là, oui, là,j’ai peur.", gender: "female", isPresident: false },
+        { character: "L’ Avocat Général", text: "un monstre froid, calculateur, incapable de repentir et privé de conscience.", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "20 ans. Mes crimes sont théoriquement passibles de 30 ans de prison.Mais mon avocat s’est voulu… rassurant: “ L’avocat n’ira pas jusque-là. Vous êtes primo-criminelle ; ça jouera en votre faveur. Il réclamera entre 5 et 20 ans. Dans le pire des cas, 20 ans.", gender: "female", isPresident: false },
+        { character: "L’ Avocat Général", text: "C’est pourquoi je requiers, à l’encontre de l’accusée, 20 ans de réclusion criminelle.", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "20 ans! 20 ans, ben voilà.C’est le pire des cas. Moi, je m’étais préparée mentalement à 10. Avec mes 3 ans de détention provisoire et en misant sur une peine divisée par 2 pour conduite exemplaire, je sortais dans…deux ans ….et demi,maximum. Constance aurait 14 ans et Julie aurait 12 ans. Mais là…", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Madame Mathilde Collignon, avez-vous quelque chose à ajouter pour votre défense ?", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "Oui! Monsieur le Président, je vous remercie. Mesdames et messieurs les jurés, j’aurais dû avoir foi en la justice de mon pays au lieu de me faire réparation moi-même. [Et je coupe le son ... et je remets le son] J’ai été agressée, alors j’ai réagi.Mal, ça, oui, je le reconnais.Vous pouvez me condamner ; j’y suis prête. Mais en me condamnant, vous condamnez aussi Constance et Julie. Ce sont mes deux filles. Elles grandiront sans leur mère. Je vous remercie.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Mesdames et messieurs les jurés, nous allons nous rendre dans la salle des délibérations. L’audience est suspendue.", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "on a tous une idée déformée de la justice.Mais on n’est pas dans un film, là. Non,là, on est dans la vie. On est dans MA vie. Et puis, on n’est pas en Amérique, on est en France. [Et je coupe le son ... et je remets le son]. Ils ont du mal à se sentir légitimes. Ils se sentent écrasés par le décorum et ils ne se permettent pas de contredire les magistrats", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Mesdames et Messieurs les jurés, vous venez d’assister à l’audience. Votre devoir, maintenant, est de livrer votre intime conviction.", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "Les deux avocats de la partie civile savent bien que le président et ses deux assesseurs auront à cœur de faire respecter le droit. Ils feront pencher la balance en faveur de la culpabilité. Il leur suffit de convaincre trois jurés sur six, et je serai condamnée. C’est une formalité.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Monsieur le premier juré,", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Oui ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "venez prendre place à mes côtés, je vous prie. Les autres, vous pouvez vous installer où vous voulez.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Est-ce que je dois présider la séance ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Ah, non non non! Vous regardez trop la télé.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Pardon, je savais pas.", gender: "male", isPresident: false }
+      ]
+    },
+    {
+      title: "A 2",
+      lines: [
+        { character: "Le Président", text: "Ne vous inquiétez pas. Vous n’êtes pas le seul. Votre fonction ne procure en réalité que peu de prérogatives. Au moment des votes, c’est vous qui comptez les bulletins. C’est tout.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Ah bon.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Mais vous avez tout de même le privilège d’être assis à côté de moi.", gender: "male", isPresident: true },
+        { character: "Le Juré Postier", text: "et c’est vous qui allez annoncer le résultat des délibérations à l’accusé.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Eh bien, vous voyez, vous n’êtes pas le seul à regarder la télé… Non, Madame, ce n’est pas lui. En France, il n’y a que le président qui peut s’adresser directement au public d’une salle d’assises. Notre ami, premier juré, restera muet comme vous tous, tenus par le secret du délibéré. Encore un mot sur la forme. Bien que personne ne 'lait encore fait jusqu'a present, merci de ne pas m’appeler « Votre Honneur ». Restons simples, appelez-moi juste « Monsieur le Président ».", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "Moi, j’aimais le sexe. Je ne devrais pas dire ça. C’est à croire que je ne retiens aucune leçon. Avouer aimer le sexe, pour une femme, même en 2025, malgré toutes les libérations du monde, c’est quand même … [Et je coupe le son ... et je remets le son] … comme une bonne mère de famille. Mais j’avais écrit que j’en avais envie. Alors là, changer d’avis en cours de route, ben, c’est plus possible. Tous les noms du monde, crier, hurler, ils ne valaient plus rien. J’ai fait trois ans de prison. Je vais peut-être en faire 17 de plus. Tout ca? parce que j’ai eu envie de baiser.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Tout le monde est bien installé ? Oui? Merci. Bien, avant de commencer, je voudrais vous relire le serment que vous avez prêté au début du procès. Vous jurez et promettez d’examiner avec l’attention la plus scrupuleuse les charges qui seront portées contre Mathilde Collignon; de ne trahir ni les intérêts de l’accusée, ni ceux de la société qui l’accuse, ni ceux des victimes, de vous décider suivant votre conscience et votre intime conviction avec l’impartialité et la fermeté qui conviennent à un homme probe et libre.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Un homme probe et libre ou une femme…", gender: "female", isPresident: false },
+        { character: "Le Président", text: "ou une femme. Mesdames et Messieurs les jurés, notre délibéré va se dérouler en deux temps. Nous allons commencer par une discussion, suivie d’un vote concernant la culpabilité de l’accusée. Au moment du vote, vous inscrivez « oui » ou « non » sur l’un des bulletins devant vous. Oui, coupable. Non, non coupable ou doute. Vous voyez, ce n’est pas compliqué. Un verdict de culpabilité n’a pas besoin de recueillir l’unanimité. Il repose sur une majorité des deux tiers. Nous sommes 9, donc 6 voix suffisent. Si le vote est positif, nous aurons une autre discussion pour définir la peine. Il est très important que le débat sur la culpabilité ne soit pas pollué par la discussion sur la peine. Il s’agit de 2 discussions bien distinctes. Est-ce que jusque-là tout est clair ?", gender: "male", isPresident: true },
+        { character: "Les jurés (tous ensemble)", text: "Oui….très clair….", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Bon. Je vous propose quelques règles pour notre discussion. Je vais vous demander de vous exprimer à tour de rôle dans le respect et la courtoisie. On s’écoute, on ne se coupe pas la parole. Nous sommes 9 parce qu’on prend de meilleures décisions ensemble qu’individuellement, et qu' aucun d’entre nous ne détient la vérité. Je crois, mesdames et messieurs, qu’un bon verdict est un verdict que l’on pourra délivrer à l’accusée en la regardant dans les yeux, tous ensemble, sans que l’un de nous regarde la pointe de ses chaussures. Si nous arrivons à faire ça, oui, nous aurons fait notre travail. Nous aurons rendu la justice.", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "J’en peux plus ! Ça vient juste de commencer et déjà, j’en peux plus! Combien de temps ça va durer? Il paraît qu’un délibéré dure rarement plus de 2 heures. Sauf s’il y a plusieurs accusés ou s’ils ont un casier judiciaire important, parce que dans ce cas-là, … [Et je coupe le son ... et je remets le son] J’ai oublié de lui dire merci. faudrait peut-être que je lui fasse livrer des chocolats. Non, il a ajouté “avec préméditation”pour que la peine passe de 10 à 15 ans. Alors, bon, du coup, il ira se gratter pour les chocolats.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "une dernière précision avant le premier tour de table. Les actes de torture et de barbarie ne sont pas décrits avec précision dans le code pénal, ce qui nous laisse une grande marge d’interprétation. Dans ce domaine, la jurisprudence permet de… Tout le monde sait ce qu’est la jurisprudence ?", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Oui, moi je sais !", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Bien. La jurisprudence permet de…", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "Pardon. Moi, je dirais qu’il me semble que je sais, mais je veux bien qu’on nous réexplique. Juste pour être sûre, je dirais.", gender: "female", isPresident: false },
+        { character: "Mathilde Collignon", text: "Bon! Écoutez, je vais vous aider, mesdames et messieurs les jurés ! Parce que, franchement, il n’y a rien de compliqué là-dedans. Alors, Mathilde Collignon est coupable. [Et je coupe le son ... et je remets le son] Allez! Hop, on n’en parle plus. Emballé, c’est pesé. Mathilde Collignon, elle sort libre. Générique de fin et l’audience est levée. Parce que sinon, 20 ans, dont 12 incompressibles, c’est, en fait, pas possible.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "La jurisprudence, c’est l’ensemble des décisions déjà rendues par des tribunaux sur un sujet donné. Ça nous éclaire pour prendre une décision. Vous avez compris ?", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "oui. Je crois que je savais déjà, en fait. Je m’appelle, je dirais, Laurence. Laurence Durouie. Je suis agent communal à la ville de Rennes. Je m’occupe des espaces verts. Je ne suis pas jardinière, non. C’est moi qui gère l’équipe. Je n’ai pas d’enfants. Le drame de ma vie. Dieu, je dirais, a préféré que je m’occupe des autres plutôt que de moi. Alors, du coup, je suis bénévole à Sourire d’Enfants. C’est une association qui s’occupe des enfants handicapés. Je ne voulais pas être tirée au sort. Non, ah, ça non! Quand j’ai entendu mon nom, j’ai marché trèèèèès lentement vers le président pour bien laisser le temps aux avocats de dire “ récusée”: ils l’ont pas dit!", gender: "female", isPresident: false }
+      ]
+    },
+    {
+      title: "B 1",
+      lines: [
+        { character: "Le Président", text: "Donc, dans la jurisprudence, les éléments les plus souvent retenus pour caractériser la torture et la barbarie sont la cruauté, la sauvagerie, la volonté d’accomplir des actes d’une gravité exceptionnelle et le désir de faire souffrir la victime. Qui veut prendre la parole… (Il regarde tout le monde, personne ne commence.) ...et nous donner ses premières impressions ?", gender: "male", isPresident: true },
+        { character: "Le Juré Olivier", text: "Allez, je me lance ! Je m’appelle Olivier, Olivier Cordier. J’ai 41 ans. Je suis responsable du service client pour une entreprise d’entretien de chaudière à Saint-Grégoire. C’est pas loin de Rennes. Je suis célibataire sans enfant. Je n’ai pas vraiment le temps, en fait, parce que je travaille trop. Quand j’ai reçu ma convocation pour venir ici, d’abord, j’ai eu peur. Une lettre recommandée, c’est toujours des emmerdes. En plus, avec le drapeau bleu, blanc,rouge,moi, j’ai tout de suite pensé que c’était une lettre des impôts. Remarquez, c’est pas mieux. En ce qui concerne mon employeur, il n’était pas vraiment ravi que je sois absent, mais il m’a donné son autorisation, à condition…bref, cette histoire, ça va me coûter au moins 400 euros. Moi, je pense qu’elle est coupable. Elle a avoué son crime pendant la garde à vue. Elle a confirmé que c’était elle pendant le procès. Et, d’ailleurs, la seule chose que réclame son avocat , c’est…comment il l’a dit, déjà ?", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "La clémence", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "La clémence, oui, merci.", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "Elle a deux filles.C’est vrai que ses enfants la méritent peut-être, notre clémence.", gender: "male", isPresident: false },
+        { character: "Le Premier Juré", text: "On n’est pas là pour être clément. On est là pour être juste", gender: "male", isPresident: false }, 
+        { character: "Le Juré Postier", text: "On est là pour rendre la justice, et la clémence peut faire partie de la justice.", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Oui, mais on se fiche de ses enfants! Pardon, pardon. Bien sûr que non, on ne s’en fiche pas de ses enfants. Elle est quand même gonflée de nous demander de penser à ses filles. Elle y a pensé,elle, avant de commettre son crime? Elle a pensé qu’elles allaient être privées de leur mère pendant qu’elle serait en prison? Ben non !", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Très juste", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "Mon avocat ne voulait pas que je parle de mes enfants, mais moi je n’ai pas écouté.Dans mon acte de contrition, je devais regretter de m’être fait justice moi-même au lieu de m’en remettre aux institutions de mon pays et regretter « l’immense douleur causée aux parties civiles ». Là, c’était un petit peu trop me demander.", gender: "female", isPresident: false },
+        { character: "Le Juré Olivier", text: "En tout cas, son avocat, il ne demande pas un acquittement pur et simple. Non, il n’y a aucun doute, c’est elle qui l’a fait. Maintenant, moi, je me demande si elle est pas un peu dérangée.", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Ça, c’est sûr!", gender: "female", isPresident: false },
+        { character: "Le Juré Olivier", text: "les experts disent que non. Mais une personne normale, elle n’aurait jamais fait un truc pareil ! Alors, je comprends qu’elle ait eu la rage après ce qui lui est arrivé; je comprends qu’elle ait eu envie de se venger, mais de là à faire ce qu’elle a fait. Non, vous trouvez pas ? C’est pour ça que je pense qu’elle est un peu folle. Voilà.", gender: "male", isPresident: false },
+        { character: "Le Premier assesseur", text: "si je peux me permettre. Nous devons tous ici partir du principe qu’elle n’est pas folle. Et tout simplement, parce qu’en France, on ne juge pas les fous, monsieur.À ce propos, vous me donnez l’occasion de vous rappeler les conclusions de l’expertise psychiatrique : aucune abolition du discernement au moment des actes reprochés à l’accusée. Bonjour, je m’appelle Paul Delorme.J’ai 32 ans, je suis juge aux affaires familiales et je suis également assesseur dans ce procès. Moi, je sors tout juste de l’école nationale de magistrature, donc je n’ai aucune expérience des assises. En revanche, je suis incollable sur n’importe quel texte de loi. Je vais vous dire: je pense exactement le contraire. Pour moi, Mathilde Collignon savait parfaitement ce qu’elle faisait. Je vous donnerai mon avis personnel plus tard, pardon.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci de ce rappel, Monsieur le Premier assesseur. Effectivement, très utile. Et vous avez raison. Vous donnerez votre avis plus tard. Je préfère que les jurés parlent en premier et que mes deux assesseurs ne prennent la parole qu’à la fin. Qui veut poursuivre ?", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Moi, je veux bien. Parce que je suis comme vous, monsieur le juge ; je ne crois pas qu’elle soit folle. Par contre, elle est dangereuse.", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "L’un n’empêche pas l’autre.", gender: "male", isPresident: false },
+        { character: "Le Premier Juré", text: "Laissez-moi finir, s’il vous plaît.", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "pardon", gender: "male", isPresident: false },
+        { character: "Le Premier Juré", text: "Pour moi, elle est coupable. Non? Franchement, si ce n’est pas de la barbarie, c’est quoi ?", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Mais oui, évidemment qu’elle est coupable!", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Si chacun fait sa justice, comme ça, c’est…le Far West ! Je ne veux pas minimiser ce qu’elle à subi, non, mais même si c’est vrai, même si les deux victimes sont en fait des salauds, rien ne peut justifier ce qu’elle leur a fait. On ne répond pas à l’horreur par l’horreur. Pour moi, elle mérite la peine maximale. Je me présente: Je m’appelle Henri. Henri de Vassou. Je suis prof de gym au lycée Descartes. J’ai 51 ans. Je suis marié et père de 4 enfants. J’ai mis un nœud papillon parce que je prends mon rôle de 1er juré très au sérieux. On me demande de juger quelqu’un et c’est bien ce que j’ai l’intention de faire.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Attention. Je vous rappelle que nous ne parlons pas de peine pour l’instant. Cette discussion doit se focaliser sur la culpabilité.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "si c’est juste sur la culpabilité, je vote coupable!", gender: "male", isPresident: false },
+        { character: "Le Président", text: "On avait bien compris, merci. Qui veut continuer?", gender: "male", isPresident: true }
+      ]
+    },
+    {
+      title: "B 2",
+      lines: [
+        { character: "Le Jurée Pharmacienne", text: "Je veux bien, Monsieur Le Président. Je m’appelle Myriam Belhaj. J’ai 28 ans. Je suis docteure en pharmacie. Je vis en couple. On a un bébé, un petit garçon de 10 mois qui s’appelle Maxime. Je suis très fière d’être là. Bon, d’abord parce que je suis une passionnée de polars et d’affaires judiciaires, mais surtout parce que je suis une petite fille de Harkis. Être ici, c’est vraiment une reconnaissance républicaine. Ça prouve que je suis une vraie Française. Je suis d’accord avec ce qui vient d’être dit. Je ne pense pas qu’elle soit folle. Je dirais même qu’elle a agi de manière rationnelle. Elle s’est rendue compte qu’elle ne pourrait pas compter sur la justice pour obtenir réparation. Elle a décidé de se venger elle-même. Ça me semble un acte réfléchi, pas une pulsion soudaine ni une illumination.Et je vais sûrement vous choquer, mais moi, j’aurais tendance à lui donner raison. Et d’ailleurs, les faits sont là.", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "Je suis absolument d’accord avec vous, Madame ; c’est un acte réfléchi. Absolument, oui, tout à fait. Et justement, c’est ça qui le rend encore plus odieux.", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Attendez, je continue. Les faits sont là et les deux agresseurs n’ont pas été poursuivis. Donc, finalement, c’est quoi…", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "en admettant, je dirais, qu’elle ait été vraiment violée.", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Bon, j’aimerais pouvoir finir ma phrase sans être interrompue", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Bien sûr, finissez, madame. (En regardant Laurence) Rappelez-vous: nous sommes là pour débattre, mais respectons les positions de chacun et évitons de nous couper la parole.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "merci. Je disais donc que la suite des événements lui a donné raison.", gender: "female", isPresident: false },
+        { character: "Le Juré Olivier", text: "C’est vrai. Sans elle, ses agresseurs seraient restés impunis.", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Exactement ! Et je ne comprends d’ailleurs toujours pas pourquoi son avocat n’a pas invoqué la légitime défense. (protestations de certains jurés.) Enfin, pour moi, c’est d’abord une victime avant d’être une criminelle !", gender: "female", isPresident: false },
+        { character: "Le Second Assesseur", text: "Excusez-moi, monsieur le Président, j’ai bien noté que vous préféreriez que nous parlions après les jurés, mais là,c’est juste pour rappeler la loi. Je peux ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Bien sûr. Faites.", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Vous pouvez la trouver non coupable ; c’est votre droit le plus strict, mais vous ne pouvez pas invoquer la légitime défense. Le droit est très clair sur ce point. Il doit y avoir proportionnalité et simultanéité. Je laisse à votre appréciation la question de la proportionnalité. Oui, c’est discutable. Mais il n’y a pas eu simultaneité. Nous ne sommes pas complètement libres dans cette pièce. Nous devons tenir compte des textes, vous comprenez ?", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Oui, oui, je comprends très bien. Alors, ce n’est peut-être pas de la légitime défense d’après la définition de la loi, mais je trouve que c’était une défense légitime. Pour moi, elle n’est pas coupable.", gender: "female", isPresident: false },
+        { character: "Le Juré Postier", text: "Oui! La question que l’on doit se poser est : peut-on la condamner alors que ses violeurs s’en sortent ?", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Pour moi, non! Ce n’est pas comme ça que je vois la République !", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "Monsieur le président, est-ce que je peux parler maintenant? C’est bon ? Vous avez fini? Je peux y aller ?", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Allez-y, j’ai fini.", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "Merci ! Eh bien, moi, je dirais que c’est une barbare !", gender: "female", isPresident: false },
+        { character: "Le Juré Olivier", text: "Oui, a bien compris de quel côté vous étiez…", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Évidemment, elle est coupable de torture! Et toutes ses excuses de viol, excusez-moi pour la franchise, mais je dirais que c’est n’importe quoi. Vous vous souvenez des messages qu’elle envoyait ? C’est quand même elle qui est allée chez lui !", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Personne ne l’a forcé !", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Merci! Aujourd’hui, de toute façon, si on écoutait toutes ces féministes, je dirais que tous les hommes c’est rien que des violeurs. Mais un homme ne peut plus nous draguer. Je ne dis pas ça pour moi, je suis mariée et fidèle, mais un homme ne peut plus vouloir coucher avec nous sans tout de suite se faire accuser de harcèlement.", gender: "female", isPresident: false }
+      ]
+    },
+    {
+      title: "B 3",
+      lines: [
+        { character: "Le Premier Juré", text: "Ça, c’est vrai !…ça devient…", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Mais bien sûr ! En plus, elle l’a dit elle-même : elle avait envie de sexe. Je vous jure! Ce n’est quand même pas très moral pour une femme d’avoir envie… ben oui, Madame ! Je suis désolée, mais on n’est pas des animaux ! On n’est pas des chiens. On n’est pas des lapins. Elle avait rendez-vous et maintenant, elle vient se plaindre qu’elle s’est fait violer. Oh, non, non, non…Je ne suis pas d’accord avec ça, moi! C’est trop facile. Je suis désolée de vous dire ça mais elle a pris un risque et…", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Mais on ne peut pas laisser dire ça ! Vous allez parler de la manière dont elle était habillée aussi ? (Grosse engueulade)", gender: "female", isPresident: false },
+        { character: "Le Président", text: "S’il vous plaît. Revenons à Mathilde Collignon! La seule question qui doit nous occuper pour l’instant et celle sur laquelle je vous demande de vous concentrer est : est-elle coupable d’acte de torture et de barbarie ? Rien d’autre ! ( A Adrienne Huet ) Madame, vous ne vous êtes pas encore exprimée. Voulez-vous nous donner votre avis ?", gender: "male", isPresident: true },
+        { character: "La jurée Adrienne", text: "Moi, je pense qu’ils ont eu que ce qu’ils méritaient, Ces deux salopards! Adrienne Huet, 57 ans, mariée et trois garçons. Aide-soignante à l’EPADH du Clos St Martin. C’est dur. S’occuper des résidents, les voir mourir. Des fois, il y en a ; ils n’ont même pas le temps de voir leur famille avant de mourir. Alors moi, j’ai besoin de me changer les idées. Je fais partie d’une troupe de théâtre amateur. C’est sympa parce qu’on joue des comédies. Moi, j’en ai marre des tragédies. Et ce procès-là, c’est vraiment une tragédie ! Non seulement ce sont des porcs, mais en plus, ils sont complètement cons : croire qu’elle avait aimé ça!!! Qu’elle en voulait encore! Non, mais on rêve ? Pour moi, il est hors de question de condamner une femme que personne n’aurait écoutée. Le jour où les violeurs seront punis, ce jour-là, oui, peut-être qu’il faudrait la condamner, mais aujourd’hui, on ne peut pas.", gender: "female", isPresident: false },
+        { character: "Le Juré Olivier", text: "Elle a raison ! Elle avait pas d’autre choix, Mathilde Collignon!", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Et moi je dis qu’elle à protégé d' autres femmes de ces deux salauds. Mais c’est vrai! Combien de femmes, elle a sauvées ? D’après vous, ils en auraient violé combien d’autres si on avait continué à les laisser faire ? Moi, je refuse de condamner cette femme. Les mecs, ils réfléchiront peut-être à deux fois avant de sortir leur zizi sans qu’on leur demande.", gender: "female", isPresident: false },
+        { character: "Le Premier assesseur", text: "Madame, j’entends tout à fait votre colère et je comprends aussi", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Non, vous pouvez pas comprendre, vous êtes un homme!", gender: "female", isPresident: false },
+        { character: "Le Premier Assesseur", text: "Je voulais juste préciser encore une fois, Madame, que nous devons d’abord nous prononcer sur sa culpabilité. Vous dites que vous ne souhaitez pas qu’elle soit condamnée. Très bien. Mais au moment de la discussion sur la peine et à ce moment-là, seulement, vous pourrez dire que vous souhaitez une peine symbolique. Ce n’est pas incompatible, c’est même votre droit. En revanche, dire que Mathilde Collignon n’est pas coupable, ça, ce n’est juste pas raisonnable parce que simplement, ce n’est pas vrai. La réalité..", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "la réalité, c’est qu’elle ne pouvait pas faire autrement!", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "elle ne pouvait pas faire autrement ?", gender: "female", isPresident: false },
+        { character: "La jurée Adrienne", text: "Non!", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Mais enfin, c’est du sadisme ce qu’elle leur a fait.", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Elle n’a fait que se défendre.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Ah non, non, non ! Ils dormaient quand elle s’est occupée d’eux. (Brouhaha - Ca discute - ca s'invective)", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Du calme, du calme, je vous en prie. Bon, finissons le tour de table. (Au postier) Monsieur, quel est votre avis?", gender: "male", isPresident: true },
+        { character: "Le Juré Postier", text: "Pour tout vous dire, j’hésite. C’est le mot “barbare”qui me gêne. Quand les talibans lapident une femme adultère, je me dis que ce sont des barbares. Quand les hommes violent des femmes, là aussi, ce sont des barbares. [Et je coupe le son ... et je remets le son]. Je suis postier. Enfin, j’étais postier 37 ans. Maintenant, je suis à la retraite. [Et je coupe le son ... et je remets le son]. Je me suis toujours dit que j’aimerais y être un jour et bien là, c’est fou, j’y suis. Je doute. Vous avez dit, Monsieur le Président, que si on doutait, on devait dire non sur notre bulletin de vote. C’est bien ça ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Oui, Monsieur, vous avez très bien compris.", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "Pardon, mais de quoi doutez-vous, monsieur? Vous doutez que Mathilde Collignon ait commis ces crimes ? OU vous doutez que ces crimes relèvent de la barbarie?", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "Je suis comme tout le monde, évidemment qu’elle l’a fait! Je doute simplement que ce soit à nous de dire si c’est de la barbarie ou de la torture vu ce qui lui est arrivé. Voilà, c’est tout.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Avez-vous autre chose à ajouter?", gender: "male", isPresident: true },
+        { character: "Le Juré Postier", text: "Non. C’est bon.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci beaucoup. Monsieur l’Assesseur, à vous maintenant. Vous avez la parole. Qu'avez-vous à dire?", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "Rien de bien long, Monsieur le président. Si les crimes de Mathilde Collignon ne relèvent pas de la barbarie, alors, pardon, mais je me demande jusqu’où il faut aller pour obtenir la qualification de barbare. Jusqu’où ? Donc, évidemment, pour moi, Monsieur le président, elle est coupable. Et sans aucune hésitation.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "(Vers le Premier assesseur) Merci. (Vers le second assesseur) Monsieur l’assesseur ?", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Je m’appelle Laurent Verch. Je suis juge d’instruction depuis 15 ans. Ce n’est pas la première fois que je remplis ce rôle d’assesseur. On m’a déjà demandé de présider des assises, mais j’ai refusé. Je préfère les enquêtes, le terrain, la collaboration avec les services de police et la quête de la vérité. Je voudrais rappeler ici à l’ensemble du jury les dommages physiques et psychologiques infligés aux victimes. Et comme vous le disiez en ouverture, Monsieur le Président, nous sommes bien en présence de la volonté d’accomplir des actes d’une gravité exceptionnelle et du désir de faire souffrir les victimes. Pour moi, ça ne fait aucun doute : elle est coupable d’acte de torture et de barbarie.", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "C’est long! Mon Dieu, comme c’est long ! Ça n’en finit pas. Toujours pas de verdict. Je sais pas si c’est bon signe ou si c’est mauvais signe. Ça fait trois ans que je me demande : mais comment j’ai pu faire ça ? Comment j’ai pu me laisser envahir par une telle haine, par un tel appétit de vengeance? Sans penser aux conséquences.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "A moi de conclure. Eh bien, je dois commencer par vous dire que je m’attendais à un délibéré compliqué. Mais je pensais que ce serait au moment de la discussion sur la peine, pas sur la culpabilité. Les deux interventions de Marc Couzy et d’Adrienne Huet me donnent à réfléchir, bien sûr. Mais je suis investi d’une mission: faire respecter le droit. Comme vous, je conviens que la justice a probablement failli en ne poursuivant pas Jérôme Dichaud et Benoît Rigol. Comme vous, je suis révolté de les voir libres, car oui, j’accorde foi aux propos de Mathilde Collignon. Quoi qu’elle ait pu dire ou écrire avant ce rendez-vous, et quelle que soit la façon dont elle était vêtue, à partir du moment où elle a dit non, c’est ce non qui aurait dû prévaloir. Dès lors que ces deux hommes n’ont pas respecté ce NON et ont employé la contrainte, oui, cette femme a été violée. Et je comprends que l’émotion soit vive. Mais nous devons faire abstraction de l’émotion pour vivre en société. L’émotion et la justice ne font pas bon ménage. Je ne sais plus qui a mentionné le Far West.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "C’est moi!", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Oui, voilà! Eh bien, nous ne voulons pas de cela. Nous avons le privilège de vivre en démocratie et cette démocratie repose sur le respect des lois que nous sommes collectivement chargés de faire appliquer tous ensemble. Si j’écoute ma raison, ce que j’ai lu et entendu au cours du procès et la nature des crimes qu’elle a commis, tout concourt à me convaincre de sa culpabilité pour acte de torture et de barbarie. Est-ce que quelqu’un veut ajouter quelque chose ? (Adrienne se mouche bruyamment) Ou bien, pouvons-nous considérer que nous sommes prêts à voter ? ( Il se lève ) Je rappelle la question: Mathilde Collignon est-elle coupable d’acte de torture et de barbarie? Vous inscrivez OUI ou NON sur le bulletin (les jurés écrivent). La règle est claire: il faut au moins 6 voix pour la culpabilité. Allons-y.", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "Comment j’ai pu être aussi bête? Prendre le risque de tout perdre juste pour ne pas les laisser s’en sortir. Ça a été plus fort que moi. Ils m’ont piétinée. Ils m’ont humiliée. Ils m’ont salie. Je ne pouvais pas laisser passer. Il fallait que je leur donne une bonne leçon. Mais je suis qui, moi, pour donner des leçons ? J’aurais mieux fait de rentrer dans le rang. De faire comme toutes les femmes qui continuent à vivre en cachant leurs souffrances. Enfin, j’ai quand même eu une petite consolation. C’est que j’avais raison, depuis le début. Ils n’ont pas été poursuivis…..non, ils sont libres de leurs mouvements. Alors, ils sont un petit peu diminués. Oui, ça, c’est vrai. Mais enfin, quand même, ils sont libres.", gender: "female", isPresident: false }
+      ]
+    },
+    {
+      title: "C 1",
+      lines: [
+       { character: "Le Président", text: "Monsieur le premier juré, allez-y, je vous en prie, lisez à voix haute sous le contrôle de tout le monde.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Oui, Oui, Non, Non, Oui, Non, Non", gender: "male", isPresident: false },
+        { character: "Le Président", text: "On s’arrête là.", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "Ben, on regarde pas les autres votes ?", gender: "female", isPresident: false },
+        { character: "Le Président", text: "On a 4 non; inutile de lire les autres bulletins. Il est impossible de réunir 6 Oui. Par conséquent, l’acusée est déclarée non coupable du chef d’accusation d’acte de torture et de barbarie.", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "Ah, non,non,non, ce n’est pas possible. On ne peut pas laisser ça faire !", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Mais enfin, elle est coupable! Même elle, elle le dit.", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Mais vous vous rendez compte de la réaction des victimes et de leurs familles?", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Et la presse? Alors là, les médias vont nous tomber dessus!", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Sans parler des réactions politiques. Mais enfin, voyons!", gender: "female", isPresident: false },
+        { character: "Le Premier assesseur", text: "Le mieux serait de revoter.", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Mais pourquoi on revoterait?", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Mais parce qu’elle est coupable, tout simplement.", gender: "male", isPresident: false },
+        { character: "Le Premier assesseur", text: "Mais vous ne vous rendez pas compte des conséquences! Avec une accusée qui avoue… on est face à des actes monstrueux!", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Non, mais quand même, si les femmes ….", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "Oh, arrêtez avec les femmes! (Engueulade)", gender: "female", isPresident: false },
+        { character: "Le Président", text: "ça suffit! Nous sommes dans une salle de délibérés! Pas dans un meeting ni sur un plateau de télévision. Il n’y aura pas de revote, Monsieur Delorme. (Au 1er Juré et a Laurence) Et pas de débat après le débat.", gender: "male", isPresident: true },        
+        { character: "Mathilde Collignon", text: "(Marie) Depuis mon divorce, j’avais pris l’habitude de me connecter sur Tinder. C’est un site de rencontres. On fait défiler des photos et, quand un mec qui nous plaît, alors là, on le like et, s'il nous like en retour, on matche, voilà. C’est pas plus compliqué que ça. Ensuite, on échange des messages, … [Et je coupe le son ... et je remets le son] J’ai eu une peur…. animale, viscérale, paralysante. Ils se sont servis de moi. Je les entendais. Ils m’insultaient, ils me tiraient les cheveux, ils m’ont frappée. Et puis ils m’ont forcée. Encore, encore, encore. C’était un déchaînement de haine, de violence, de soumission, d’odeur de sueur, de porcherie. Ils m’ont salie. Partout. Et après, après, c’était le silence.", gender: "female", isPresident: false }
+      ]
+    },
+    {
+      title: "C 2",
+      lines: [
+        { character: "Le Président", text: "Bon, allez, 10 minutes de pause. J’autorise exceptionnellement les jurés à sortir de la salle des délibérés. Allez aux toilettes, dégourdissez-vous les jambes et surtout, surtout, changez-vous les idées après ces échanges électriques. J’espère que nous reprendrons dans des dispositions de respect mutuel et d’écoute. On peut faire ça ? (les jurés sortent). Delorme, vous restez; j’ai à vous parler. Monsieur le juge aussi, s'il vous plaît.", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "J’étais toute nue. Je tremblais de peur, de froid, de douleur. Alors vite, partir, quitter cette maison.J’essaie de me relever et là, devant moi, Guichaud, un verre à la main”tiens, Sophie,, je t’ai apporté un verre d’eau.Et il attrape le plaid qui était posé sur le canapé du salon [Et je coupe le son ... et je remets le son] ...Me purifier de toutes traces de ces salopards. Mais je crois que…j’étais surtout débordée par la haine. Oui, c’est là. C’est à partir de ce moment-là que… que ça a complètement dérapé chez moi.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Il faut absolument que l’on reprenne les choses en main.", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "tout ça, c’est parce qu’ils sont intoxiqués par les réseaux sociaux.", gender: "male", isPresident: false },
+        { character: "Le Second Assesseur", text: "Vous êtes sur Facebook, monsieur le président ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Non", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Instagram, Twitter ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Non plus.", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Tant mieux pour vous; tant mieux pour la justice. Vous n’êtes pas influencé par des centaines de posts. Mais les jurés sont complètement intoxiqués par ces commentaires: Ils l’avaient bien cherché! Liberté pour Collignon!.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Mais ça devient n’importe quoi! On est censé se forger une intime conviction pendant le procès. Ni avant ni en dehors. Moi, je vais vous dire: je tiens à la contribution du peuple, à la justice de mon pays, mais là, le temps des jurés est peut-être révolu.", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Oui, c’est possible.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Si on continue comme ça, ce sera la fin des jurys populaires. Ils seront remplacés par des magistrats.", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "J’aurais dû aller chez les flics. Mais avec mon Tinder, mes textos. Je n’avais aucune chance. Alors je suis rentrée chez moi, j’ai libéré la baby-sitter et j’ai pris une douche. La douche la plus longue de l’histoire des douches. Puis, j’ai frotté ma peau. Avec du savon, avec un gant de crin. Je savais que j’effacerais toute preuve physique et toute possibilité d’un recours juridique ultérieur, mais…Consciemment ou inconsciemment, je me dirigeais déjà vers la voie sans issue de la vengeance.", gender: "female", isPresident: false },
+        { character: "Le Premier assesseur", text: "Vous avez peut-être raison, mais, Monsieur le Président, là, l’important, c’est de remettre un peu d’ordre dans le délibéré.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Ah, vous faites bien de la ramener, vous. C’est quoi ces sorties de technocrates? Ce vocabulaire ampoulé. Cette façon de prendre les gens de haut? Vous voyez où ça nous mène?", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "Pardonnez-moi, monsieur le président, mais c’est quand même vous qui conduisez ce procès, pas moi! Donc, c’est un peu facile de me tenir responsable de la tournure que prennent les événements.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Mais je n’ ai jamais dit ça! Mais vous avez réussi à braquer tout le monde. Ce ne sont plus des jurés. Ce sont des militants.", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "Ce n’est pas la première fois que la politique fait irruption aux assises.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "C’est vrai ! Mais il n’est pas question que le procès de Mathilde Collignon soit à l’origine de l’acceptation de la vengeance comme légitime défense. J’ai laissé ce délibéré m’échapper, mais je compte bien reprendre les choses en main, alors, faites un effort, mon vieux! Allez prendre l’air tous les deux. J’espère que vous faites preuve de plus d’empathie aux affaires familiales (les avocats sortent).", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "Je pensais à me venger, mais je ne savais pas comment. Je ne voulais pas qu’ils meurent, non, ça, c’était trop facile.Moi, je voulais qu’ils souffrent. Qu’ils ne passent pas une heure de leur vie sans regretter leur crime. Au début, j’avais pensé leur tatouer sur le torse: « Je suis un gros porc … [Et je coupe le son ... et je remets le son] … Et je suis partie.Avec le regret quand même de ne pas voir leur tête au réveil quand ils se rendraient compte que Sophie la salope les avaient coupés. J’ai jeté leurs organes sexuels dans les toilettes et j’ai tiré la chasse. Aucune récupération ou reconstruction possible. Adieu.", gender: "female", isPresident: false }
+      ]
+    },
+    {
+      title: "D 1",
+      lines: [
+        { character: "Le Président", text: "Bien. Merci à tous et à toutes de reprendre rapidement vos places. Nous avons répondu non à la première question: Mathilde Collignon est-elle coupable d’avoir commis des actes de torture et de barbarie? Il s’agit maintenant pour nous de répondre à la question: Mathilde Collignon est-elle coupable d’actes de violence volontaire avec préméditation ayant entraîné une mutilation ou une infirmité permanente sur les personnes de Jérôme Guichaud et Benoît Riole , dans la nuit du 24 au 25 octobre 2019 ? Qui veut se lancer ?", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Si vous me le permettez, monsieur le président, j’aimerais partager avec vous la manière dont j’aborde la réponse à cette question. Mathilde Collignon a-t-elle exercé des violences sur les personnes de Jérôme Guichaud et Benoît Riol ? La réponse est oui. Si couper les testicules et le sexe d’un homme sans son accord préalable n’est pas un acte violent, alors qu’est-ce qui est violent ? Ensuite, on nous demande si ces violences étaient volontaires. Alors, à moins d’avoir glissé sur un bistouri et , en essayant de se rattraper. [Et je coupe le son ... et je remets le son]. Est-ce qu’une repousse est envisageable? En cas contraire, cette infirmité est permanente. Aussi, quand je réfléchis à l’impression qu’ont faite sur ma réserve toutes les preuves rapportées contre l’accusée, je ne me vois pas répondre autrement que par OUI à la question que vous venez de lire, monsieur le président.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Je vous remercie, Monsieur le juge, pour votre intervention et pour avoir réussi à détendre l’atmosphère de cette assemblée. Monsieur Verch a-t-il résumé la position de tout le monde? Avant de passer au vote, est-ce que quelqu’un conteste le fait que les actes de l’accusée relèvent de la violence volontaire? Personne? Bien. Même question concernant la préméditation. Personne non plus. Et sommes-nous tous d’accord sur le fait que les deux victimes présentent chacune une mutilation ou une infirmité permanente? Oui.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Oui, sauf que je ne suis toujours pas convaincue qu’ils fassent les qualifier de victimes, ces deux-là.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Disons « les parties civiles », si vous préférez.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Oui, je préfère.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Ou appelons-les par leur nom.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Voilà.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Bien ! Puisque tout le monde est d’accord, votons! (ils votent) Monsieur le premier juré, allons-y, je vous prie.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré  (debout)", text: "OUI, NON, NON,", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Attendez, je ne comprends pas. Personne n’a exprimé de désaccord et en voilà deux qui ont voté NON. Sans s’exprimer, ni débattre, ni argumenter, enfin! Bon, continuez.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré  (debout)", text: "OUI, NON", gender: "male", isPresident: false },
+        { character: "Le Président", text: "(très énervé) Bon, si le prochain bulletin est un NON, l’accusée sera acquittée alors que tout le monde était d’accord pour dire qu’il y avait eu des violences volontaires préméditées!…Allez-y!", gender: "male", isPresident: true },
+        { character: "Le Premier Juré  (debout)", text: "OUI, OUI,", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Et le dernier bulletin ?", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "Je suis retournée à ma voiture, consciente de laisser derrière moi une scène de crime qui ferait la Une de tous les journaux.J’avais privé de leur masculinité deux mâles dominants. La violée a, à son tour, violé un tabou. À mes yeux, Guichaud et Riol méritaient ce châtiment. Mais moi, est-ce que je méritais de me retrouver au ban de la société ? J’étais soulagée d’avoir fait les gestes proprement, mais je n’éprouvais aucune joie. Cette vengeance ne rendait ma douleur ni plus sage ni plus tranquille. J’avais pas de remords, mais je ne me sentais pas mieux, et la vision de ces deux émasculés me hantait. J’avais fait ça, moi ?", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "OUI", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Bon, on a six voix en faveur de la culpabilité.", gender: "male", isPresident: true }
+      ]
+    },
+    {
+      title: "D 2",
+      lines: [
+        { character: "La Jurée Laurence", text: "Moi, je dirais je me demande bien qui a voté NON.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Peu importe, madame. Le vote est clos et le résultat est OUI.", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "Alors, ces deux-là, ils ont voté NON, mais quel est le troisième? C’est vous ? Sûrement, non ?", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Madame, ça suffit, stop. À la question: Mathilde Collignon est-elle coupable d’avoir commis des actes de violence volontaires et prémédités ayant entraîné une mutilation ou une infirmité volontaires permanentes? Il a été répondu OUI, avec une majorité de 6 voix au moins (tampon sur le document). Nous devons maintenant nous interroger sur la peine à appliquer. Ce crime est passible d'une peine de 15 ans de réclusion criminelle.", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Nous avons toute liberté si nous souhaitons que la peine soit inférieure.", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "là aussi, nous allons discuter puis voter ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Oui, mais cette fois, une majorité simple suffira, c’est-à-dire 5 voix en faveur d’une même peine.", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "Mais de quoi on va parler? On a dit qu’elle était coupable.Alors si la loi dit 15 ans, ben, c’est 15 ans, et puis c’est tout.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "C’est vrai, pourquoi continuer à discuter ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "c’est un peu plus compliqué, chère madame. Si les peines étaient appliquées automatiquement, on n’aurait pas besoin de juge ni de justice, à vrai dire.", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "La police suffirait. Un tel est coupable d’homicide involontaire au cours d’un accident de voiture ; il écope de 3 ans de prison et nous, on se fiche éperdument des circonstances de cet accident: est-ce que la route était verglacée, est-ce qu’il a évité un obstacle ?", gender: "male", isPresident: false },
+        { character: "Le Premier assesseur", text: "c’est ce qu’on appelle le principe d’individualisation des peines. C’est un pilier de notre démocratie.", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "est-ce que ça veut dire que nous,nous pouvons fixer une peine à zéro ?", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Pas tout à fait. Le code pénal nous oblige à prononcer une peine qui ne peut être inférieure à un an.", gender: "male", isPresident: true },
+        { character: "Le Juré Olivier", text: "Oui, mais si on prononce une peine de moins de trois ans, vu qu’elle les a déjà faits ses trois ans, ça veut dire quoi? Qu’elle en est dispensée?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Tout à fait. Toute peine inférieure à 3 ans lui permettrait de sortir libre du tribunal", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Il manquerait plus que ça !", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Et pour le sursis, ça marche comment ?", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Il ne s’applique qu’à des peines inférieures à 5 ans. Si nous votons une peine inférieure à 5 ans, je vous demanderai de voter à nouveau pour décider d’un éventuel sursis. D’autres questions? Non? Commençons le tour de table, dans ce cas. Qui veut se lancer ?", gender: "male", isPresident: true },
+        { character: "Le Premier Juré  et @La jurée Adrienne  (en même temps)", text: "Moi! Moi, je veux bien.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Allez-y, allez-y", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Merci. Monsieur le président, pour la personnalité, moi, je vois que du bon: c’est une honnête citoyenne, médecin, travailleuse, généreuse et une bonne maman. D’ailleurs, elle nous a demandé d’être cléments pour pouvoir s’occuper de ses enfants.", gender: "female", isPresident: false }
+      ]
+    },
+    {
+      title: "D 3",
+      lines: [
+        { character: "La Jurée Laurence", text: "Pitié, on ne va pas recommencer avec ça !", gender: "female", isPresident: false },
+        { character: "Le Premier assesseur", text: "Pardon, madame, mais ici, c’est la cour des assises, pas la cour des miracles.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci, Monsieur l’assesseur, pour votre intervention, dont, une fois de plus, on se serait bien passé.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Si tous les criminels étaient acquittés, nos gosses y seraient plus jamais en sécurité.", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "En tout cas, c’est quelqu’un de bien! Pour les circonstances, maintenant, bien sûr, le crime est horrible.C’est vrai. Enfin, le mobile est clair. Elle a subi un viol. Elle a estimé que ses violeurs devaient être punis", gender: "female", isPresident: false },
+        { character: "Le Juré Olivier", text: "et si elle le faisait pas, personne ne le ferait à sa place.", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Je ne crois pas que ce soit un danger pour la société, Monsieur le Président. Elle ne commettra pas d’autres crimes.", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "je me demande bien ce que vous en savez, madame.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Elle doit lire dans une boule de cristal", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "Mais laissez-la parler, enfin!", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Merci! Elle a déjà été bien punie.Moi, je serais plutôt en faveur du dispositif dont monsieur a parlé tout à l’heure, condamnation symbolique, 3 ans, voire moins. Comme ça, elle retournerait avec ses filles. Voilà, j’ai fini.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Moi, je serais moins angélique que vous. Si je reprends votre logique, si je regarde sa personnalité, je vois une femme qui enchaîne les rencontres comme on enfile des perles. Elle est obsédée par le sexe. Je suis pas sûr qu’on puisse la qualifier de mère modèle.", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Comment pouvez-vous dire des conneries pareilles ?", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Madame, s’il vous plaît", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Je ne vous ai pas insultée, moi!", gender: "male", isPresident: false },
+        { character: "Le Président", text: "chacun parle à son tour et surtout, on ne s’invective pas!", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Mais non,pardon, mais parce qu’une femme ose mener sa vie sexuelle comme elle l’entend, elle est légère et immorale. On oublie que c’est une mère aimante et", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "je peux finir, s’il vous plaît ?", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Allez-y monsieur, allez-y", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "En tout cas, moi, je voudrais pas que ma femme, elle aime le sexe comme l’accusée, ah, ça, ah, ça non.", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "En tout cas, vous ne devez pas vous amuser tous les jours.", gender: "male", isPresident: false },
+        { character: "Le Premier Juré", text: "C’est pas ce que j’ai voulu dire…", gender: "male", isPresident: false }
+      ]
+    },
+    {
+      title: "D 4",
+      lines: [
+        { character: "Le Président", text: "Ne vous inquiétez pas, monsieur, on vous a bien compris.", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Ah bon... Parce ma femme, elle peut-etre olé olé aussi, faut pas croire. Mais olé olé, comme y faut. Y a même une fois, elle voulait que je...", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Monsieur, monsieur, s’il vous plaît, revenons à Mathilde Collignon, s’il vous plaît !", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "oui, pardon, excusez-moi.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci!!!", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "Sur les circonstances du crime, maintenant, il est horrible son geste, viol ou pas . Complètement disproportionné. Cruel et barbare. Alors, je sais bien que les femmes, ici, ont estimé que ce n’était pas de la barbarie, mais enfin", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Moi, j’ai jamais dit ça. Au contraire.", gender: "female", isPresident: false },
+        { character: "Le Second Assesseur", text: "Non, ce ne sont pas les femmes qui ont estimé, c’est l’ensemble du jury", gender: "male", isPresident: false },
+        { character: "Le Premier Juré", text: "Mouais. N’empêche, on voit bien qu’elles ne sont pas très concernées par ce qui va manquer à ces deux pauvres gars. Une femme capable d’un crime pareil, moi, je ne suis pas certain, comme vous, qu’elle soit inoffensive pour la société.Un type qui lui fait une queue de poisson, elle va lui amputer les deux mains pour lui apprendre à tenir son volant ?", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Mais oui, elle est dangereuse, cette femme, voyons.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Elle fout les jetons! Non, non, moi je vote la peine maximale.", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "C’est pas parce qu’une femme à décidé de se faire justice elle-même, qu’elle va se transformer en super héro, écumer la ville pour traquer les hommes et les découper en morceaux à la moindre occasion. Sérieusement! Non, moi je crois comme Adrienne, comme Madame Huette", gender: "female", isPresident: false },
+        { character: "La jurée Adrienne", text: "Huet", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Huet. Elle a suffisamment souffert, cette femme.", gender: "female", isPresident: false },
+        { character: "La jurée Adrienne", text: "Mais oui! Il faut la libérer. C’est pas un danger pour l’ordre public.", gender: "female", isPresident: false },
+        { character: "La Jurée Laurence", text: "Alors comme ça, on peut se promener dans la rue avec un sécateur, étêter des testicules à tir l’arigot et s’en sortir avec 3 ans! Mais vous dites n’importe quoi. Moi, je vote 15 ans.", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "Bravo.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Bon, eh bien, je vois que nous avons déjà 4 opinions bien tranchées. Monsieur Couzy, Monsieur Cordier, qu’en pensez-vous?", gender: "male", isPresident: true },
+        { character: "Le Juré Postier", text: "Je peux commencer ?", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "Je vous en prie.", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "C’est gentil. Je dois dire que je suis partagée. Je dirais que, question personnalité, elle est normale. Bon, avec des défauts, mais qui n’en a pas? Pour les circonstances, je suis un peu gênée qu’elle ait tout nettoyé, tout bien organisé et tout bien exécuté. Je trouve ça, un peu froid. C’est pas vraiment une vengeance, comme quand on a le sang chaud, que j’aurais presque trouvé normal. Donc, je ne me sens pas de dire qu’elle n’est pas dangereuse à 100 %. Faut marquer le coup, non? 10 ans, c’est ce que je voulais dire.", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "En 68, vous avez défilé pour de Gaulle, vous, non ?", gender: "male", isPresident: false }
+      ]
+    },
+    {
+      title: "D 5",
+      lines: [
+        { character: "Le Juré Postier", text: "Quel rapport?", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "La révolution, c’est bien gentil, mais à un moment, il faut que ça s’arrête. C’est ça ? Vite le retour à l’ordre et à la sécurité", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "En 68, j’avais 16 ans et le droit de vote, c’était à 21 ans.", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "Ouais, d’accord. Mais c’est dingue. Si on ne s’y met pas tous et nous, les hommes en premier, les femmes vont continuer à se faire écraser sans rien dire. Si on veut que ça change, Mathilde Collignon, il ne faut pas qu’elle croupisse en prison. Ou alors, sous prétexte qu’on a une paire de testicules, les femmes doivent se faire dominer pour l’éternité.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Monsieur Cordier! Votre avis sur la peine. Vous n’avez plus la parole.", gender: "male", isPresident: true },
+        { character: "Le Juré Olivier", text: "C’est ce que je disais: les hommes au pouvoir et les femmes ou ceux qui essaient de les défendre ont juste à se la fermer. Ben, puisque c’est comme ça, je ferme ma bouche.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Pardonnez-moi. Je n’aurais pas dû hausser le ton. Nous vous écoutons.", gender: "male", isPresident: true },
+        { character: "Le Juré Olivier", text: "Je n’ai plus rien à dire.", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "eh bien, tant mieux!", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Madame, je vous en prie. Bon. Monsieur Verch (Second avocat), nous vous écoutons.", gender: "male", isPresident: true },
+        { character: "Le Second Assesseur", text: "Concernant la personnalité, je dois le reconnaître : tout est favorable à l’accusée. Sa vie sexuelle ne regarde qu’elle. Et je ne pense pas qu’elle représente un danger pour la société. Mais pour les circonstances du crime, elle a agi avec un sang-froid et une cruauté que j’ai rarement rencontrés dans ma carrière judiciaire. Et ce qui me gêne encore plus, c’est de constater qu’elle n’éprouve aucun remords.", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Ah non, aucun remords !", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "c’est vrai! À aucun moment elle s’est repentie", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "En plus, elle est toubib, non, mais c’est monstrueux!", gender: "female", isPresident: false },
+        { character: "Le Second Assesseur", text: "Donc, à mon sens, il faut fixer une période de détention plus que symbolique. Et je n’irai pas jusqu’à la peine maximale. Mais, 10 ans seraient justifiés. Il faut qu’elle prenne conscience de la gravité de ses actes.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci, Monsieur l’assesseur. À vous, Monsieur Delorme. Il nous tarde de connaître le fond de votre pensée.", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "Le fond de ma pensée, monsieur le président, c’est que nous avons fait preuve d’une clémence exceptionnelle en exonérant l’accusée de culpabilité de torture et de barbarie.Enfin, pardon, mais même en Arabie saoudite ou dans les pires régimes,où pourtant les dirigeants sont un peu connus pour avoir de l’imagination, je ne pense pas que l’émasculation fasse partie de l’éventail des mesures de répression ou de punition.", gender: "male", isPresident: false },
+        { character: "La jurée Adrienne", text: "Evidemment! Ce sont des hommes qui décident. Ils n’ont pas envie de se faire couper les roubignolles. Et quand il s’agit de décider pour les femmes, ben, ils se gênent moins.", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Excision, lapidation, immolation…", gender: "female", isPresident: false },
+        { character: "Le Premier assesseur", text: "Bon. Quant aux circonstances de l’acte, là encore, je ne vois pas en mon âme et conscience comment on ne pourrait pas appliquer la peine maximale. Pour moi, c’est 15 ans.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci.", gender: "male", isPresident: true },
+        { character: "Le Premier assesseur", text: "De rien.", gender: "male", isPresident: false }
+      ]
+    },
+    {
+      title: "D 6",
+      lines: [
+        { character: "Le Président", text: "Monsieur Cordier, vous voulez peut-être ajouter quelque chose.", gender: "male", isPresident: true },
+        { character: "Le Juré Olivier", text: "Moi, je vous ai dit au début ce que je pensais. Elle est devenue dingue pendant un moment. Alors, vous m’avez expliqué par a+b que non, que les experts ceci, cela. Qu’il ne fallait pas que je m’inquiète parce qu’on en parlerait au moment de la peine. Ben on y est", gender: "male", isPresident: false },
+        { character: "Le Juré Postier", text: "Côté personnalité, cette femme , elle est nickel", gender: "male", isPresident: false },
+        { character: "Le Juré Olivier", text: "Et côté circonstance, moi, je vois un truc exceptionnel qui va jamais se reproduire.C’est pour ça que, personnellement, je pense à une peine avec sursis. Elle aurait une épée de Damoclès au-dessus de la tête et là, c’est sûr, Madame, elle se tiendrait à carreau.", gender: "male", isPresident: false },
+        { character: "Mathilde Collignon", text: "Mais qu’est-ce qu’ils font, ces jurés ? C’est pas possible! Je vais finir par devenir folle, moi. Ah non, c’est vrai, je suis saine d’esprit. C’est l’expert psychiatre qui l’a dit à la barre. Il a été formel. Enfin, néanmoins, je suis une femme qui nourrit une détestation des hommes depuis sa plus tendre enfance. J’ai eu un père absent. J’ai eu une mère me martelant pour me fabriquer une indépendance financière. J’ai eu un mariage aussi hâtif que raté. Et une frénésie sexuelle venant alimenter une mysandrie maladive ! Ah , je suis un petit peu folle, quand même. Mais pas assez pour être déclarée irresponsable.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Donc, pour vous, c’est quoi? 5 ans, c’est bien ça ?", gender: "male", isPresident: true },
+        { character: "Le Juré Olivier", text: "Oui, c’est ça.5 ans, c’est bien. Mais entre ceux qui veulent 3 ans, moi qui en veut 5 et ceux qui veulent la peine maximale. On va faire comment pour se mettre d’accord?", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Ah ben oui, parce qu’entre 5 et 15 ans, c’est pas la même mayonnaise, moi je dirais.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Nous avons besoin d’une majorité simple: 5 voix sur 9.", gender: "male", isPresident: true },
+        { character: "Le Juré Postier", text: "5 voix, on n’est pas prêts de se mettre d’accord!", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Nous allons procéder à un scrutin à plusieurs tours. Par exemple, imaginons qu’au 1er tour un juré vote pour 10 ans, un pour 9, un pour 8, et ainsi de suite jusqu’au dernier, qui vote pour 2 ans ; nous sommes très loin des 5 votes requis. Qu’à ne cela ne tienne, nous revotons, mais cette fois, la peine maximale proposée au tour précédent est écartée. Plus personne ne peut voter pour 10 ans. Et ainsi de suite. Vous voyez, la tâche est moins compliquée qu’il n’y paraît.", gender: "male", isPresident: true },
+        { character: "Le Juré Postier", text: "Et vous, monsieur le président, vous nous avez pas dit pour qu’elle peine vous penchez.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Bien, j’attendais que tout le monde se soit exprimé pour le faire à mon tour. Dans tout ce que j’ai entendu jusqu’alors, aucun de vous n’a parlé des parties civiles. Je vous rappelle que la peine doit , je cite, respecter les intérêts de la victime. Il n’y a pas un seul Français qui ne sache aujourd’hui que Riol et Guichaud sont devenus des eunuques. Alors, ce sont sans doute de vrais salauds. Mais la République leur aurait infligé une punition digne. Pas cette mutilation, cette humiliation. Libérer Mathilde Collignon indiquerait au monde qui nous observe que la France considère qu’émasculer ses concitoyens n’est pas si grave, du moment qu’on a une bonne raison, et ça, ce n’est pas possible. Je penchais à l’origine pour 15 ans, la peine maximale, mais après vous avoir écoutés, tous et toutes, je pencherai pour 10 ans. Voilà. Est-ce qu’on est prêts à voter? À mettre un chiffre? Sinon, on continue à discuter. Pas de problème.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Mais si on la condamne à 10 ans, par exemple. Est-ce qu’elle va vraiment faire 10 ans ou est-ce qu’elle peut être libérée avant ?", gender: "female", isPresident: false },
+        { character: "Le Premier assesseur", text: "Non, justement. Le code prévoit que la condamnée peut effectuer moins que sa peine. Enfin, évidemment s'il y a des gages sérieux de réinsertion sociale. Dans ce cas-là, 10 ans peuvent se transformer en 7 ans et demi. Et dans le cas de Mathilde Collignon, vu qu’elle a déjà fait 3 ans et demi de détention provisoire, elle sortirait au bout de 4 ans.", gender: "male", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "4 ans!", gender: "female", isPresident: false },
+        { character: "Le Premier Juré", text: "c’est pas grand-chose par rapport à ce qu’elle a fait.", gender: "male", isPresident: false },
+        { character: "La Jurée Laurence", text: "Exact! Raison de plus pour lui coller 15 ans.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Est-ce que cela répond à votre question, Madame Belhaj ?", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Oui, merci.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Lançons ce premier tour de scrutin. Soyez sans crainte. Vous votez, c’est votre devoir. Ensuite, la décision vous échappe. C’est la décision de la cour.", gender: "male", isPresident: true },
+        { character: "Le Président", text: "Monsieur le Premier juré, je vous en prie (en lui tendant la boîte).", gender: "male", isPresident: true },
+        { character: "Le Premier Juré", text: "15, 10, 10, 1, 2, 5, 10, 15, 5.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Merci. Cela fait donc 2 bulletins à 15 ans, 3 à 10 ans, 2 à 5 ans, 1 à 2 ans et 1 à 1 an. Je vous rappelle qu’il faut 5 voix avec la même peine. Au prochain vote, nous ne pouvons pas voter pour 15 ans.", gender: "male", isPresident: true },
+        { character: "La Jurée Laurence", text: "Bon, ben voilà, ça va faire 10 ans. Je dirais, là, les deux qui ont voté 15 ans, vous redescendez pour rejoindre ceux qui ont voté 10 ans et du coup on aura 5 voix à 10 ans. Et mon Dieu, on n’en parle plus.", gender: "female", isPresident: false },
+        { character: "Le Second Assesseur", text: "Non. Non, ça ne marche pas comme ça. Votre logique est bonne, mais il faut revoter jusqu’au bout.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "Passons au vote suivant, si vous le voulez bien. (Ils commencent à écrire sauf Adrienne)", gender: "male", isPresident: true }
+      ]
+    },
+    {
+      title: "FIN",
+      lines: [
+        { character: "La jurée Adrienne", text: "Si vous permettez, je voudrais dire quelque chose.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Je vous en prie, Madame.", gender: "male", isPresident: true },
+        { character: "La jurée Adrienne", text: "Monsieur le président, si c’qu’on dit n’a pas de rapport direct avec l’affaire, est-ce que le secret des délibérations s’applique aussi?", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Ah, bien entendu, Madame. Et j’ajoute que je veillerai personnellement à poursuivre quiconque ici violerait son serment. Vous êtes tous prévenus. Nous vous écoutons.", gender: "male", isPresident: true },
+        { character: "La jurée Adrienne", text: "C’que j’vais vous raconter maint’nant, j’l’ai jamais dit. à personne; ni à mes parents, ni à mon mari, ni à mes 3 garçons, ni à des amis, ni à des collègues. À personne. J’ai été violée, à 23 ans, dans le premier hôpital où je travaillais. J’m’entendais bien avec un des chefs de clinique. j’croyais qu’il voulait m’encourager à devenir infirmière. J’étais naïve. À poursuivre mes études, quoi. Pis, un soir, c’tait après son tour de garde ; il m’a proposé de me montrer quelques gestes médicaux, dans une salle d'examens vide. Dès que la porte a été fermée, il a essayé de m’embrasser. J’ai r’culé. Il a insisté. Excusez-moi (elle se lève). Je l’ai r’poussé. J’ui ai dit NON. [Et je coupe le son ... et je remets le son] Ne pas condamner plus lourdement Mathilde Collignon, c’est pas prendre le parti des femmes, c’est pas dire que la vengeance est légitime, c’est pas bafouer la République, c’est rendre justice à toutes ces femmes que personne n’a écoutées, réconfortées , consolées, réparées. Un viol, ça nous brise de l’intérieur. Y a même certains pays qui l’utilisent comme arme de guerre! (silence)", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Merci, Madame. J’aimerais vous dire que vous avez tort, que la justice prend soin de toutes les victimes de viol dans notre pays, mais je suis au regret de ne pas pouvoir l’affirmer. Je comprends ce que vous voulez nous dire et j’y suis sensible, mais je ne peux pas arriver aux mêmes conclusions que vous. Je ne serais pas dans mon rôle. Est-ce que quelqu’un veut ajouter quelque chose ? (Silence) Bien, votons. (Ils écrivent)", gender: "male", isPresident: true },
+        { character: "Mathilde Collignon", text: "J’entends des pas. Ça y est, c’est fini. On vient me chercher. Non, attendez, attendez. Mesdames et messieurs les jurés, je regrette. Je regrette mon geste. Je regrette mon crime. Je regrette. Je regrette de ne pas avoir su vous dire à quel point, je regrette. Je regrette pour Constance, je regrette pour Julie (elle pleure), pardon, pardon. J’aurais dû être cette victime honorable. J’aurais dû pleurer, j’aurais dû témoigner, j’aurais dû accepter d’être examinée, encore souillée, par un collègue gynécologue, j’aurais dû répondre mille fois aux questions tendancieuses, j’aurais dû me tenir bien docile sur le banc des victimes, j’aurais dû accepter la condamnation symbolique à l’endroit de mes agresseurs. Oui, j’aurais dû! J’aurais dû retourner faire le ménage et m’occuper de mes enfants. Oui, j’aurais dû être cette victime exemplaire.", gender: "female", isPresident: false },
+        { character: "Le Président", text: "Voilà, on en reste là. Ce qui clôture notre délibéré. Merci à toutes et à tous. Récupérez vos affaires. Prenez 5 minutes de pause, puis rejoignez la salle d’audience. Nous reprenons dans un quart d’heure, le temps de prévenir les différentes parties prenantes du procès. (Ils se lèvent et sortent, le président en dernier)", gender: "male", isPresident: true },
+        { character: "Le Président", text: "(Au public) Je m’appelle Clément Largeron et je suis président de la cour d’assises. Tout le monde se moque de mon prénom dans les couloirs du tribunal. Clément, pour un juge, ce n’est pas l’idéal. Pourtant, ils savent bien que je ne le suis pas, clément. J’ai simplement une haute idée du droit que je place au dessus de toute autre considération. Je ne suis ni cruel ni sans cœur ; je suis juste, et, je n’ai pas honte de le dire, je suis raide comme la justice. Le droit prévaut. Continuez à bafouer le droit, laissez l’opinion juger à l’emporte-pièce à coups de tweets et de posts, et vous récolterez, à coup sûr, le chaos ou (au lieu de et) la dictature. (il sort)", gender: "male", isPresident: true },
+        { character: "Voix off", text: "Mesdames et Messieurs, la cour! Veuillez vous lever, s’il vous plaît.", gender: "male", isPresident: false },
+        { character: "Le Président", text: "(en voix OFF) - Vu les réponses aux questions posées et les dispositions des articles 132.18 et 132.24 du code pénal dont la lecture a été donnée par le président, la cour et le jury, après en avoir délibéré conformément à la loi, condamnent Madame Mathilde Collignon à la peine de 5 années d’emprisonnement. En outre, la cour et le jury disent à la même majorité qu’il sera sursis à l’exécution d’une partie de cette peine, ladite partie étant fixée à deux ans. En conséquence, la cour ordonne la remise en liberté immédiate de Madame Mathilde Collignon.", gender: "male", isPresident: true },
+        { character: "Le Jurée Pharmacienne", text: "Excusez-moi,pardon, je vous dérange pas longtemps. Je voulais vous remercier. Vraiment, vous avez été formidable. Sans votre témoignage, jamais Mathilde Collignon n’aurait été libérée. Alors, je ne peux pas imaginer tout ce que vous avez subi", gender: "female", isPresident: false },
+        { character: "La jurée Adrienne", text: "C’que j’ai subi ?", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Ben oui, votre agression, vos 30 ans de silence, enfin, tout ça !", gender: "female", isPresident: false },
+        { character: "La jurée Adrienne", text: "Ah, ça.Voyez-vous, parfois le destin a b’soin d’un coup d’pouce. Les hommes sont prévisibles, vous l’savez bien.", gender: "female", isPresident: false },
+        { character: "Le Jurée Pharmacienne", text: "Attendez, vous voulez dire que…non…oh non, vous n’avez pas fait ça…", gender: "female", isPresident: false },
+        { character: "La jurée Adrienne", text: "Je n’vois vraiment pas d’quoi vous voulez parler. Bonne soirée. (elle sort)", gender: "female", isPresident: false }
+      ]
+    }
+            ];
+
+            useEffect(() => {
+                const loadVoices = () => {
+                    const availableVoices = window.speechSynthesis.getVoices();
+                    setVoices(availableVoices);
+                    const frenchVoices = availableVoices.filter(v => v.lang.startsWith('fr'));
+                    const findBestVoice = (gender) => {
+                        const premium = frenchVoices.find(v => 
+                            (v.name.includes('Google') || v.name.includes('Microsoft') || v.name.includes('Premium')) &&
+                            (gender === 'male' ? v.name.includes('Male') || v.name.includes('Thomas') || v.name.includes('Henri') : 
+                             v.name.includes('Female') || v.name.includes('Amélie') || v.name.includes('Marie'))
+                        );
+                        return premium || frenchVoices.find(v => gender === 'male' ? !v.name.includes('Female') : v.name.includes('Female')) || frenchVoices[0];
+                    };
+                    if (frenchVoices.length > 0) {
+                        setSelectedVoices({
+                            'FEMMES': findBestVoice('female')?.name || frenchVoices[0]?.name,
+                            'HOMMES': findBestVoice('male')?.name || frenchVoices[0]?.name
+                        });
+                    }
+                };
+                loadVoices();
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }, []);
+
+            // Charger les marque-pages sauvegardés
+            useEffect(() => {
+                const savedBookmarks = localStorage.getItem('femmesBookmarks');
+                if (savedBookmarks) {
+                    setBookmarks(JSON.parse(savedBookmarks));
+                }
+            }, []);
+
+            const speakPresidentFromChunk = (chunks, startIndex, opts, onFinished) => {
+                const { voiceName, pitch = 1, lang = 'fr-FR', rate = speechRate } = opts;
+                let i = startIndex;
+                const commaMs = commaPause * 1000;
+                const sentenceMs = sentencePause * 1000;
+
+                const next = () => {
+                    if (i >= chunks.length) {
+                        presidentChunkIndexRef.current = 0;
+                        if (typeof onFinished === 'function') onFinished();
+                        return;
+                    }
+                    presidentChunkIndexRef.current = i;
+                    const raw = chunks[i];
+                    const part = raw.trim();
+                    i += 1;
+                    if (!part) { next(); return; }
+
+                    const lastChar = raw.slice(-1);
+                    let pause = 100;
+                    if (lastChar === ',' || lastChar === ';' || lastChar === ':') pause = commaMs;
+                    else if (lastChar === '.' || lastChar === '!' || lastChar === '?') pause = sentenceMs;
+
+                    const u = new SpeechSynthesisUtterance(part);
+                    u.lang = lang;
+                    u.rate = rate;
+                    u.pitch = pitch;
+                    if (voiceName) {
+                        const v = voices.find(vv => vv.name === voiceName);
+                        if (v) u.voice = v;
+                    }
+                    utteranceRef.current = u;
+                    u.onend = () => {
+                        presidentChunkIndexRef.current = i;
+                        presidentTimeoutRef.current = setTimeout(next, pause);
+                    };
+                    window.speechSynthesis.speak(u);
+                };
+                next();
+            };
+
+            const speakPresidentLine = (text) => {
+                if (presidentSpeechState === 'playing') {
+                    window.speechSynthesis.cancel();
+                    if (presidentTimeoutRef.current) {
+                        clearTimeout(presidentTimeoutRef.current);
+                        presidentTimeoutRef.current = null;
+                    }
+                    setPresidentSpeechState('paused');
+                    return;
+                }
+                if (presidentSpeechState === 'paused') {
+                    setPresidentSpeechState('playing');
+                    speakPresidentFromChunk(
+                        presidentChunksRef.current,
+                        presidentChunkIndexRef.current,
+                        presidentSpeechOptsRef.current,
+                        () => setPresidentSpeechState('idle')
+                    );
+                    return;
+                }
+                // Démarrage
+                const roleGender = sections.flatMap(s => s.lines).find(l => l.character === selectedRole)?.gender || 'male';
+                const voiceKey = roleGender === 'female' ? 'FEMMES' : 'HOMMES';
+                const opts = { voiceName: selectedVoices[voiceKey], pitch: roleGender === 'female' ? 1.1 : 0.75, rate: speechRate };
+                const cleanText = text.replace(/\([^()]*\)/g, '').replace(/\s+/g, ' ').trim();
+                if (!cleanText) return;
+                const chunks = cleanText.match(/[^,;.!?:]+[.,;!?:]?/g) || [cleanText];
+                presidentChunksRef.current = chunks;
+                presidentChunkIndexRef.current = 0;
+                presidentSpeechOptsRef.current = opts;
+                setPresidentSpeechState('playing');
+                speakPresidentFromChunk(chunks, 0, opts, () => setPresidentSpeechState('idle'));
+            };
+
+            // Speak text while inserting pauses based on punctuation.
+            // Comma/semicolon -> commaPause seconds, period/!/? -> sentencePause seconds
+            // Fonctions pour les marque-pages
+            const toggleBookmark = () => {
+                const key = `${currentSection}-${currentLine}`;
+                const newBookmarks = { ...bookmarks };
+                
+                if (newBookmarks[key]) {
+                    delete newBookmarks[key];
+                } else {
+                    const currentLineData = sections[currentSection].lines[currentLine];
+                    newBookmarks[key] = {
+                        section: currentSection,
+                        line: currentLine,
+                        character: currentLineData.character,
+                        text: currentLineData.text.substring(0, 50) + (currentLineData.text.length > 50 ? '...' : ''),
+                        date: new Date().toISOString(),
+                        category: 'À travailler' // Par défaut
+                    };
+                }
+                
+                setBookmarks(newBookmarks);
+                localStorage.setItem('femmesTRAE_bookmarks', JSON.stringify(newBookmarks));
+            };
+
+            // Vérifier si la réplique actuelle est marquée
+            const isBookmarked = () => {
+                const key = `${currentSection}-${currentLine}`;
+                return !!bookmarks[key];
+            };
+
+            // Aller à un marque-page spécifique
+            const goToBookmark = (section, line) => {
+                setCurrentSection(section);
+                setCurrentLine(line);
+                setIsPlaying(false);
+                setRevealedLine(false);
+                setShowBookmarks(false);
+            };
+
+            // Supprimer un marque-page
+            const removeBookmark = (key) => {
+                const newBookmarks = { ...bookmarks };
+                delete newBookmarks[key];
+                setBookmarks(newBookmarks);
+                localStorage.setItem('femmesTRAE_bookmarks', JSON.stringify(newBookmarks));
+            };
+
+            const speakWithPunctuationPauses = (text, opts = {}, onFinished) => {
+                const { voiceName, pitch = 1, lang = 'fr-FR', rate = speechRate, commaPause: optComma, sentencePause: optSentence } = opts;
+                window.speechSynthesis.cancel();
+
+                // Supprimer le texte entre parenthèses (didascalies) - gère les parenthèses imbriquées
+                const textWithoutParentheses = text.replace(/\([^()]*\)/g, '').replace(/\s+/g, ' ').trim();
+                
+                // Si tout le texte était entre parenthèses, ne rien lire
+                if (!textWithoutParentheses) {
+                    if (typeof onFinished === 'function') onFinished();
+                    return;
+                }
+                
+                const parts = textWithoutParentheses.match(/[^,;.!?:]+[.,;!?:]?/g) || [textWithoutParentheses];
+                let i = 0;
+
+                const commaMs = (optComma !== undefined ? optComma : commaPause) * 1000;
+                const sentenceMs = (optSentence !== undefined ? optSentence : sentencePause) * 1000;
+
+                const next = () => {
+                    if (i >= parts.length) {
+                        if (typeof onFinished === 'function') onFinished();
+                        return;
+                    }
+
+                    const raw = parts[i];
+                    const part = raw.trim();
+                    i += 1;
+
+                    if (!part) return next();
+
+                    const lastChar = part.slice(-1);
+                    let pause = 100; // default short gap
+
+                    if (lastChar === ',' || lastChar === ';' || lastChar === ':') {
+                        pause = commaMs;
+                    } else if (lastChar === '.' || lastChar === '!' || lastChar === '?') {
+                        pause = sentenceMs;
+                    }
+
+                    const u = new SpeechSynthesisUtterance(part);
+                    u.lang = lang;
+                    u.rate = rate;
+                    u.pitch = pitch;
+                    if (voiceName) {
+                        const v = voices.find(vv => vv.name === voiceName);
+                        if (v) u.voice = v;
+                    }
+
+                    utteranceRef.current = u;
+                    u.onend = () => setTimeout(next, pause);
+                    window.speechSynthesis.speak(u);
+                };
+
+                next();
+            };
+
+            // Retourne les deux dernières phrases non-vides d'un texte (sans didascalies)
+            const getLastSentence = (text) => {
+                const clean = text.replace(/\([^()]*\)/g, '').replace(/\s+/g, ' ').trim();
+                const sentences = clean.split(/(?<=[.!?])\s+/).filter(s => s.trim());
+                if (sentences.length <= 2) return clean;
+                return sentences.slice(-2).join(' ');
+            };
+
+            const allRoles = [...new Set(sections.flatMap(s => s.lines.map(l => l.character)))];
+            const isMyRole = (line) => line.character === selectedRole;
+
+            // Réinitialiser le TTS quand on change de rôle
+            useEffect(() => {
+                setPresidentSpeechState('idle');
+                if (presidentTimeoutRef.current) { clearTimeout(presidentTimeoutRef.current); presidentTimeoutRef.current = null; }
+                window.speechSynthesis.cancel();
+                setRevealedLine(false);
+                setPrompterState('hidden');
+            }, [selectedRole]);
+
+            // Trouve l'index de la ligne qui précède la prochaine réplique du rôle sélectionné
+            // à partir de fromLine (exclu) dans la section donnée.
+            // Retourne null si aucune réplique du rôle sélectionné n'est trouvée après.
+            const findCueLineIndex = (sectionIdx, fromLine) => {
+                const lines = sections[sectionIdx].lines;
+                for (let i = fromLine + 1; i < lines.length; i++) {
+                    if (isMyRole(lines[i])) return i - 1; // ligne juste avant
+                }
+                return null;
+            };
+
+            const speak = (text, gender, isCueLine = false) => {
+                const voiceKey = gender === 'female' ? 'FEMMES' : 'HOMMES';
+                const voiceName = selectedVoices[voiceKey];
+                const pitch = gender === 'female' ? 1.1 : 0.75;
+                const textToSpeak = (turboMode && isCueLine) ? getLastSentence(text) : text;
+                
+                speakWithPunctuationPauses(textToSpeak, { voiceName, pitch, rate: speechRate }, () => {
+                    const totalLines = sections[currentSection].lines.length;
+                    const textLength = textToSpeak.length;
+                    const basePause = 800;
+                    const lengthBasedPause = Math.min(textLength * 20, 2000);
+                    const totalPause = basePause + lengthBasedPause;
+                    const isTurbo = turboMode;
+
+                    if (isTurbo && isCueLine) {
+                        // Cue line lue : avancer d'une ligne ou changer de section
+                        if (currentLine + 1 < totalLines) {
+                            setTimeout(() => setCurrentLine(prev => prev + 1), 300);
+                        } else if (currentSection < sections.length - 1) {
+                            setTimeout(() => { setCurrentSection(prev => prev + 1); setCurrentLine(0); }, 400);
+                        } else {
+                            setIsPlaying(false);
+                        }
+                        return;
+                    }
+
+                    if (isTurbo) {
+                        // Sauter à la prochaine cue line
+                        const cueIdx = findCueLineIndex(currentSection, currentLine);
+                        if (cueIdx !== null) {
+                            setTimeout(() => setCurrentLine(cueIdx), 300);
+                            return;
+                        } else if (currentSection < sections.length - 1) {
+                            const nextCueIdx = findCueLineIndex(currentSection + 1, -1);
+                            if (nextCueIdx !== null && nextCueIdx >= 0) {
+                                setTimeout(() => { setCurrentSection(prev => prev + 1); setCurrentLine(nextCueIdx); }, 400);
+                            } else {
+                                setTimeout(() => { setCurrentSection(prev => prev + 1); setCurrentLine(0); }, 400);
+                            }
+                            return;
+                        } else {
+                            setIsPlaying(false);
+                            return;
+                        }
+                    }
+
+                    if (currentLine < totalLines - 1) {
+                        setTimeout(() => setCurrentLine(prev => prev + 1), totalPause);
+                    } else if (currentSection < sections.length - 1) {
+                        setTimeout(() => { setCurrentSection(prev => prev + 1); setCurrentLine(0); }, totalPause + 400);
+                    } else {
+                        setIsPlaying(false);
+                    }
+                });
+            };
+
+            // Générer le texte selon l'état du souffleur
+            const getPrompterText = (text) => {
+                if (!showPrompter || prompterState === 'hidden') {
+                    // Utiliser des points de suspension au lieu de underscores
+                    return '...';
+                }
+                
+                if (prompterState === 'hint') {
+                    // Afficher les deux premiers mots + le reste masqué
+                    const words = text.split(' ');
+                    if (words.length <= 2) return text;
+                    return words.slice(0, 2).join(' ') + ' ...';
+                }
+                
+                // 'full' ou 'audio' : afficher le texte complet
+                return text;
+            };
+
+            // Gestion des gestes tactiles
+            const handleTouchStart = (e) => {
+                setTouchStartX({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+            };
+
+            const handleTouchEnd = (e) => {
+                if (touchStartX === null) return;
+                
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = touchStartX.x - touchEndX;
+                const diffY = touchStartX.y - touchEndY;
+                
+                // Swipe valide : > 80px horizontal ET plus horizontal que vertical (ratio 2:1)
+                if (Math.abs(diffX) > 80 && Math.abs(diffX) > Math.abs(diffY) * 2) {
+                    if (diffX > 0) {
+                        // Swipe gauche -> suivant
+                        handleNext();
+                    } else {
+                        // Swipe droite -> précédent
+                        handlePrevious();
+                    }
+                    
+                    // Cacher l'indicateur après premier swipe
+                    if (showSwipeHint) {
+                        setShowSwipeHint(false);
+                        localStorage.setItem('femmesTRAE_swipeHintSeen', 'true');
+                    }
+                }
+                
+                setTouchStartX(null);
+            };
+
+            // Gérer le clic sur le texte en mode souffleur
+            const handlePrompterClick = () => {
+                if (!showPrompter || !isMyRole(currentLineData)) return;
+                
+                // En mode souffleur, la réplique est automatiquement considérée comme révélée
+                if (!revealedLine) {
+                    setRevealedLine(true);
+                }
+                
+                if (prompterState === 'hidden' || prompterState === 'hint') {
+                    // Premier clic : afficher le texte complet
+                    setPrompterState('full');
+                } else if (prompterState === 'full') {
+                    // Deuxième clic : lire le texte
+                    setPrompterState('audio');
+                    speakPresidentLine(currentLineData.text);
+                } else if (prompterState === 'audio') {
+                    // Troisième clic : revenir au texte complet
+                    setPrompterState('full');
+                }
+            };
+
+            // Timer pour le souffleur
+            useEffect(() => {
+                let interval;
+                if (showPrompter && isMyRole(currentLineData) && prompterState === 'hidden') {
+                    setPrompterTimer(prompterDelay); // Initialiser avec la valeur configurée
+                    interval = setInterval(() => {
+                        setPrompterTimer(prev => {
+                            if (prev <= 1) {
+                                setPrompterState('hint');
+                                clearInterval(interval);
+                                return 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+                } else {
+                    setPrompterTimer(prompterDelay);
+                }
+                return () => clearInterval(interval);
+            }, [currentSection, currentLine, showPrompter, prompterState, prompterDelay]);
+
+            // Réinitialiser l'état quand on change de réplique
+            useEffect(() => {
+                if (isMyRole(currentLineData)) {
+                    setPrompterState('hidden');
+                    setPrompterTimer(prompterDelay);
+                } else {
+                    setPrompterState('hidden');
+                }
+            }, [currentSection, currentLine, prompterDelay, selectedRole]);
+
+
+
+            useEffect(() => {
+                if (isPlaying) {
+                    const line = sections[currentSection].lines[currentLine];
+if (!isMyRole(line)) {
+                    const sectionLines = sections[currentSection].lines;
+                        // isCueLine = STRICTEMENT la ligne juste avant le rôle sélectionné
+                    const isCueLine = turboMode && !!sectionLines[currentLine + 1] && isMyRole(sectionLines[currentLine + 1]);
+
+                        if (turboMode && !isCueLine) {
+                            const cueIdx = findCueLineIndex(currentSection, currentLine);
+                            if (cueIdx !== null && cueIdx >= 0) {
+                                // Sauter à la cue line, le prochain useEffect appellera speak() avec isCueLine=true
+                                setCurrentLine(cueIdx);
+                            } else {
+                                // Plus de Président dans la section → sauter directement à la section suivante
+                                if (currentSection < sections.length - 1) {
+                                    const nextCueIdx = findCueLineIndex(currentSection + 1, -1);
+                                    if (nextCueIdx !== null && nextCueIdx >= 0) {
+                                        setCurrentSection(prev => prev + 1);
+                                        setCurrentLine(nextCueIdx);
+                                    } else {
+                                        setCurrentSection(prev => prev + 1);
+                                        setCurrentLine(0);
+                                    }
+                                } else {
+                                    setIsPlaying(false);
+                                }
+                            }
+                            return;
+                        }
+
+                        speak(line.text, line.gender, isCueLine);
+                    } else {
+                        setIsPlaying(false);
+                    }
+                } else {
+                    window.speechSynthesis.cancel();
+                }
+            }, [currentLine, isPlaying, currentSection, turboMode, selectedRole]);
+
+            const handleNext = () => {
+                setRevealedLine(false);
+                setPresidentSpeechState('idle');
+                if (presidentTimeoutRef.current) { clearTimeout(presidentTimeoutRef.current); presidentTimeoutRef.current = null; }
+                window.speechSynthesis.cancel();
+                const totalLines = sections[currentSection].lines.length;
+                if (currentLine < totalLines - 1) {
+                    setCurrentLine(prev => prev + 1);
+                    setIsPlaying(true);
+                } else if (currentSection < sections.length - 1) {
+                    setCurrentSection(prev => prev + 1);
+                    setCurrentLine(0);
+                    setIsPlaying(true);
+                } else {
+                    setIsPlaying(false);
+                }
+            };
+
+            const handlePrevious = () => {
+                setRevealedLine(false);
+                setPresidentSpeechState('idle');
+                if (presidentTimeoutRef.current) { clearTimeout(presidentTimeoutRef.current); presidentTimeoutRef.current = null; }
+                window.speechSynthesis.cancel();
+                if (currentLine > 0) {
+                    setCurrentLine(prev => prev - 1);
+                } else if (currentSection > 0) {
+                    setCurrentSection(prev => prev - 1);
+                    setCurrentLine(sections[currentSection - 1].lines.length - 1);
+                }
+            };
+
+            const handleReset = () => {
+                setIsPlaying(false);
+                setCurrentSection(0);
+                setCurrentLine(0);
+                setRevealedLine(false);
+                setPresidentSpeechState('idle');
+                if (presidentTimeoutRef.current) { clearTimeout(presidentTimeoutRef.current); presidentTimeoutRef.current = null; }
+                window.speechSynthesis.cancel();
+            };
+
+            const currentLineData = sections[currentSection].lines[currentLine];
+
+            return React.createElement('div', { 
+                className: "min-h-screen p-4",
+                ref: rootRef,
+                onTouchStart: handleTouchStart,
+                onTouchEnd: handleTouchEnd
+            },
+                React.createElement('div', { className: "max-w-4xl mx-auto" },
+                    React.createElement('div', { className: "text-center mb-3 pt-4" },
+                        React.createElement('h1', { className: "text-4xl font-bold mb-2" }, 'Femmes en Colère'),
+                        React.createElement('p', { className: "text-orange-300 text-lg" }, `Version Abrégée - ${selectedRole}`),
+                        React.createElement('p', { className: "text-orange-400/70 text-sm mt-1" }, '⚡ Certaines répliques ont été raccourcies'),
+                        
+                        // Indicateur de gestes
+                        showSwipeHint && React.createElement('div', { className: "mt-4 flex items-center justify-center gap-2 swipe-hint" },
+                            React.createElement('svg', { width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2" },
+                                React.createElement('path', { d: "M14 5l7 7m0 0l-7 7m7-7H3" })
+                            ),
+                            React.createElement('span', { className: "text-sm text-orange-300" }, 'Swipe gauche/droite pour naviguer')
+                        )
+                    ),
+                    React.createElement('div', { className: "mb-6" },
+                        React.createElement('div', { className: "mb-3 flex items-center gap-3" },
+                            React.createElement('label', { className: "text-sm text-orange-300 whitespace-nowrap" }, '🎭 Mon rôle :'),
+                            React.createElement('select', {
+                                value: selectedRole,
+                                onChange: (e) => {
+                                    const newRole = e.target.value;
+                                    setSelectedRole(newRole);
+                                    const s = JSON.parse(localStorage.getItem('femmesTRAE_settings') || '{}');
+                                    localStorage.setItem('femmesTRAE_settings', JSON.stringify({ ...s, selectedRole: newRole }));
+                                },
+                                className: "flex-1 p-2 bg-slate-700 rounded border border-slate-600 text-white text-sm"
+                            }, allRoles.map(role => React.createElement('option', { key: role, value: role }, role)))
+                        ),
+                        React.createElement('div', { className: "flex flex-wrap justify-center gap-2 pb-2" },
+                            sections.map((section, idx) =>
+                                React.createElement('button', {
+                                    key: idx,
+                                    onClick: () => {
+                                        setCurrentSection(idx);
+                                        setCurrentLine(0);
+                                        setIsPlaying(false);
+                                        setRevealedLine(false);
+                                        setPresidentSpeechState('idle');
+                                        if (presidentTimeoutRef.current) { clearTimeout(presidentTimeoutRef.current); presidentTimeoutRef.current = null; }
+                                        window.speechSynthesis.cancel();
+                                    },
+                                    className: `w-11 py-1.5 rounded text-sm text-center whitespace-nowrap transition-all ${
+                                        currentSection === idx ? 'bg-red-600 shadow-lg shadow-red-500/50' : 'bg-slate-700 hover:bg-slate-600'
+                                    }`
+                                }, section.title)
+                            )
+                        ),
+                        React.createElement('div', { className: "flex items-center justify-between mt-2" },
+                            React.createElement('p', { className: "text-sm text-orange-300" }, 
+                                `${currentLine + 1} / ${sections[currentSection].lines.length} lignes`
+                            ),
+                            React.createElement('button', {
+                                onClick: () => setTurboMode(!turboMode),
+                                className: `flex items-center gap-2 px-3 py-1 rounded-lg text-sm transition-all ${
+                                    turboMode ? 'bg-yellow-600 shadow-lg shadow-yellow-500/50' : 'bg-slate-700 hover:bg-slate-600'
+                                }`,
+                                title: "Mode Turbo : saute à la réplique juste avant le Président"
+                            },
+                                React.createElement(ZapIcon),
+                                turboMode ? 'Mode Turbo ⚡' : 'Mode Normal'
+                            )
+                        )
+                    ),
+                    React.createElement('div', { className: "bg-slate-800/50 backdrop-blur rounded-2xl p-6 mb-6 min-h-[300px] border border-red-500/20" },
+                        React.createElement('div', { className: "flex items-start gap-4 mb-4" },
+                            React.createElement('div', { 
+                                className: `px-3 py-1 rounded-full text-sm font-semibold ${
+                                    isMyRole(currentLineData) ? 'bg-green-600' : 
+                                    currentLineData.gender === 'female' ? 'bg-pink-600' : 'bg-blue-600'
+                                }`
+                            }, currentLineData.character)
+                        ),
+                        React.createElement('div', { className: "text-xl leading-relaxed" },
+                            isMyRole(currentLineData) ? 
+                                React.createElement('div', {
+                                    className: `bg-green-900/30 border-l-4 border-green-500 p-4 rounded transition-all ${
+                                        !revealedLine && !showPrompter ? 'cursor-pointer hover:bg-green-900/40' : ''
+                                    } ${showPrompter ? 'shadow-lg shadow-green-500/30' : ''}`
+                                },
+                                    React.createElement('div', { className: "flex justify-between items-center mb-2" },
+                                        React.createElement('p', { className: "text-green-100 font-semibold" }, `🎭 ${selectedRole.toUpperCase()}`),
+                                        showPrompter && React.createElement('div', { className: "flex items-center gap-2" },
+                                            prompterState === 'hidden' ? React.createElement(EyeOffIcon) : 
+                                            prompterState === 'hint' ? React.createElement(EyeIcon) :
+                                            prompterState === 'audio' ? React.createElement(Volume2Icon) : React.createElement(EyeIcon),
+                                            React.createElement('span', { className: "text-xs text-green-300" },
+                                                prompterState === 'hidden' ? `Indice dans ${prompterTimer}s` :
+                                                prompterState === 'hint' ? 'Indice : 2 premiers mots' :
+                                                prompterState === 'audio' ? 'Lecture en cours' : 'Texte complet'
+                                            )
+                                        )
+                                    ),
+                                    (revealedLine || showPrompter) ? 
+                                        React.createElement('div', null,
+                                            React.createElement('p', { 
+                                                className: `cursor-pointer transition-colors mobile-tap-area ${
+                                                    prompterState === 'audio' ? 'text-green-300' : 'text-white hover:text-green-200'
+                                                }`,
+                                                onClick: showPrompter ? handlePrompterClick : () => speakPresidentLine(currentLineData.text),
+                                                title: showPrompter ? 
+                                                    (prompterState === 'hidden' || prompterState === 'hint' ? 'Cliquer pour voir le texte complet' :
+                                                     prompterState === 'full' ? 'Cliquer pour écouter' : 'Cliquer pour voir le texte') :
+                                                    (presidentSpeechState === 'playing' ? 'Cliquer pour mettre en pause' :
+                                                     presidentSpeechState === 'paused' ? 'Cliquer pour reprendre' :
+                                                     'Cliquer pour entendre')
+                                            }, 
+                                                showPrompter ? getPrompterText(currentLineData.text) : currentLineData.text
+                                            ),
+                                            !showPrompter && React.createElement('p', { className: "text-green-300/70 text-sm mt-2 italic" }, 
+                                                presidentSpeechState === 'playing' ? '⏸ Cliquez pour mettre en pause' :
+                                                presidentSpeechState === 'paused' ? '▶ Cliquez pour reprendre' :
+                                                '🔊 Cliquez sur le texte pour l\'entendre'
+                                            )
+                                        ) :
+                                        React.createElement('p', { 
+                                            className: "text-green-300/50 italic text-center py-8 mobile-tap-area",
+                                            onClick: () => setRevealedLine(true)
+                                        }, 'Cliquez pour révéler votre texte')
+                                ) :
+                                React.createElement('p', { className: "text-gray-200 text-display" }, currentLineData.text)
+                        )
+                    ),
+                    React.createElement('div', { className: "flex justify-center gap-3 mb-6 mobile-controls" },
+                        React.createElement('button', { onClick: handleReset, className: "p-4 bg-slate-700 hover:bg-slate-600 rounded-full transition-all mobile-tap-area control-button flex items-center justify-center", title: "Recommencer" }, React.createElement(RotateCcwIcon)),
+                        React.createElement('button', { onClick: handlePrevious, className: "p-4 bg-slate-700 hover:bg-slate-600 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed mobile-tap-area control-button flex items-center justify-center", disabled: currentSection === 0 && currentLine === 0, title: "Précédent" }, React.createElement(SkipBackIcon)),
+                        React.createElement('button', { onClick: handleNext, className: "p-5 bg-red-600 hover:bg-red-500 rounded-full shadow-lg shadow-red-500/50 transition-all mobile-tap-area control-button flex items-center justify-center", title: "Suivant" }, React.createElement(SkipForwardIcon)),
+                        React.createElement('button', { onClick: () => {
+                            setShowPrompter(!showPrompter);
+                            saveSettings();
+                        }, className: `p-4 rounded-full transition-all mobile-tap-area control-button flex items-center justify-center ${
+                            showPrompter ? 'bg-green-600 hover:bg-green-500 shadow-lg shadow-green-500/50' : 'bg-slate-700 hover:bg-slate-600'
+                        }`, title: showPrompter ? "Désactiver le souffleur" : "Activer le souffleur" }, React.createElement(EyeIcon)),
+                        React.createElement('button', { onClick: () => setShowSettings(!showSettings), className: "p-5 bg-slate-700 hover:bg-slate-600 rounded-full transition-all mobile-tap-area control-button flex items-center justify-center", title: "Réglages" }, React.createElement(SettingsIcon)),
+                        React.createElement('button', {
+                            onClick: toggleBookmark,
+                            className: `p-5 rounded-full transition-all mobile-tap-area control-button flex items-center justify-center ${
+                                isBookmarked() 
+                                    ? 'bg-yellow-600 hover:bg-yellow-500' 
+                                    : 'bg-slate-700 hover:bg-slate-600'
+                            }`,
+                            title: isBookmarked() ? "Retirer le marque-page" : "Ajouter un marque-page"
+                        }, isBookmarked() ? React.createElement(BookmarkFilledIcon) : React.createElement(BookmarkIcon)),
+                        React.createElement('button', {
+                            onClick: () => setShowBookmarks(!showBookmarks),
+                            className: `p-5 rounded-full transition-all mobile-tap-area control-button flex items-center justify-center ${
+                                showBookmarks 
+                                    ? 'bg-purple-600 hover:bg-purple-500' 
+                                    : 'bg-slate-700 hover:bg-slate-600'
+                            }`,
+                            title: "Voir les marque-pages"
+                        }, React.createElement(ListIcon))
+                    ),
+                    showSettings && React.createElement('div', { className: "bg-slate-800/90 backdrop-blur rounded-2xl p-6 mb-6 border border-red-500/20" },
+                        React.createElement('h3', { className: "text-xl font-bold mb-4 flex items-center gap-2" }, React.createElement(Volume2Icon), 'Réglages des voix'),
+                        React.createElement('div', { className: "space-y-4" },
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block mb-2" }, `Vitesse: ${speechRate.toFixed(2)}x ${turboMode ? '(Mode Turbo actif ⚡)' : ''}`),
+                                React.createElement('input', { type: "range", min: "0.90", max: "1.40", step: "0.05", value: speechRate, onChange: (e) => {
+                                    setSpeechRate(parseFloat(e.target.value));
+                                    saveSettings();
+                                }, className: "w-full" })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block mb-2" }, `Pause virgules (,:;): ${commaPause.toFixed(2)}s`),
+                                React.createElement('input', { type: "range", min: "0", max: "0.5", step: "0.01", value: commaPause, onChange: (e) => {
+                                    setCommaPause(parseFloat(e.target.value));
+                                    saveSettings();
+                                }, className: "w-full" })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block mb-2" }, `Pause phrases (.!?): ${sentencePause.toFixed(2)}s`),
+                                React.createElement('input', { type: "range", min: "0", max: "1.5", step: "0.01", value: sentencePause, onChange: (e) => {
+                                    setSentencePause(parseFloat(e.target.value));
+                                    saveSettings();
+                                }, className: "w-full" })
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block mb-2" }, '👩 VOIX FEMMES'),
+                                React.createElement('select', { value: selectedVoices['FEMMES'] || '', onChange: (e) => {
+                                    setSelectedVoices({...selectedVoices, 'FEMMES': e.target.value});
+                                    saveSettings();
+                                }, className: "w-full p-2 bg-slate-700 rounded border border-slate-600 text-white" },
+                                    voices.filter(v => v.lang.startsWith('fr')).map(voice => React.createElement('option', { key: voice.name, value: voice.name }, voice.name))
+                                )
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block mb-2" }, '👨 VOIX HOMMES'),
+                                React.createElement('select', { value: selectedVoices['HOMMES'] || '', onChange: (e) => {
+                                    setSelectedVoices({...selectedVoices, 'HOMMES': e.target.value});
+                                    saveSettings();
+                                }, className: "w-full p-2 bg-slate-700 rounded border border-slate-600 text-white" },
+                                    voices.filter(v => v.lang.startsWith('fr')).map(voice => React.createElement('option', { key: voice.name, value: voice.name }, voice.name))
+                                )
+                            ),
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block mb-2" }, `⏱️ Délai du souffleur: ${prompterDelay}s`),
+                                React.createElement('input', { type: "range", min: "1", max: "9", step: "1", value: prompterDelay, onChange: (e) => {
+                                    setPrompterDelay(parseInt(e.target.value));
+                                    saveSettings();
+                                }, className: "w-full" })
+                            )
+                        )
+                    ),
+                    showBookmarks && React.createElement('div', { className: "bg-slate-800/90 backdrop-blur rounded-2xl p-6 mb-6 border border-purple-500/20" },
+                        React.createElement('h3', { className: "text-xl font-bold mb-4 flex items-center gap-2" },
+                            React.createElement(BookmarkFilledIcon),
+                            `Marque-pages (${Object.keys(bookmarks).length})`
+                        ),
+                        Object.keys(bookmarks).length === 0 ? 
+                            React.createElement('p', { className: "text-gray-400 text-center py-4" }, 
+                                'Aucun marque-page. Cliquez sur l\'icône 📌 pour en ajouter.'
+                            ) :
+                            React.createElement('div', { className: "space-y-3 max-h-80 overflow-y-auto" },
+                                Object.entries(bookmarks).map(([key, bookmark]) => 
+                                    React.createElement('div', { 
+                                        key: key,
+                                        className: "bg-slate-700/50 rounded-lg p-4 border border-slate-600"
+                                    },
+                                        React.createElement('div', { className: "flex justify-between items-start mb-2" },
+                                            React.createElement('div', null,
+                                                React.createElement('span', { className: `px-2 py-1 rounded text-xs font-semibold ${
+                                                    bookmark.character === 'Le Président' ? 'bg-red-600' : 
+                                                    bookmark.character === 'La jurée Adrienne' ? 'bg-blue-600' : 'bg-green-600'
+                                                }` }, bookmark.character),
+                                                React.createElement('span', { className: "text-sm text-gray-400 ml-2" },
+                                                    `Section ${bookmark.section + 1}, Ligne ${bookmark.line + 1}`
+                                                )
+                                            ),
+                                            React.createElement('button', { 
+                                                onClick: () => removeBookmark(key),
+                                                className: "text-gray-400 hover:text-red-400 text-sm"
+                                            }, '×')
+                                        ),
+                                        React.createElement('p', { className: "text-sm text-gray-300 mb-2" }, bookmark.text),
+                                        React.createElement('button', { 
+                                            onClick: () => goToBookmark(bookmark.section, bookmark.line), 
+                                            className: "text-xs text-purple-400 hover:text-purple-300"
+                                        },
+                                            'Aller à cette réplique'
+                                        )
+                                    )
+                                )
+                            )
+                    ),
+                    React.createElement('div', { className: "bg-slate-800/50 backdrop-blur rounded-lg p-4" },
+                        React.createElement('div', { className: "mb-2 flex justify-between text-sm text-orange-300" },
+                            React.createElement('span', null, `Section ${currentSection + 1} / ${sections.length}`),
+                            React.createElement('span', null, `Ligne ${currentLine + 1} / ${sections[currentSection].lines.length}`)
+                        ),
+                        React.createElement('div', { className: "w-full bg-slate-700 rounded-full h-2" },
+                            React.createElement('div', { className: "bg-red-600 h-2 rounded-full transition-all duration-300", style: { width: `${((currentLine + 1) / sections[currentSection].lines.length) * 100}%` } })
+                        )
+                    )
+                )
+            );
+        };
+        ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(FemmesRehearsal));
+    </script>
+</body>
+</html>
