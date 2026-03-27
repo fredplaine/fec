@@ -1062,8 +1062,8 @@ if (!isMyRole(line)) {
                         )
                     ),
                     React.createElement('div', { className: "mb-6" },
-                        React.createElement('div', { className: "mb-3 flex items-center gap-3" },
-                            React.createElement('label', { className: "text-sm text-orange-300 whitespace-nowrap" }, '🎭 Mon rôle :'),
+                        React.createElement('div', { className: "mb-3 flex items-center gap-2" },
+                            React.createElement('span', { className: "text-lg shrink-0" }, '🎭'),
                             React.createElement('select', {
                                 value: selectedRole,
                                 onChange: (e) => {
@@ -1072,7 +1072,7 @@ if (!isMyRole(line)) {
                                     const s = JSON.parse(localStorage.getItem('femmesTRAE_settings') || '{}');
                                     localStorage.setItem('femmesTRAE_settings', JSON.stringify({ ...s, selectedRole: newRole }));
                                 },
-                                className: "flex-1 p-2 bg-slate-700 rounded border border-slate-600 text-white text-sm"
+                                className: "min-w-0 w-full p-1.5 bg-slate-700 rounded border border-slate-600 text-white text-xs"
                             }, allRoles.map(role => React.createElement('option', { key: role, value: role }, role)))
                         ),
                         React.createElement('div', { className: "flex flex-wrap justify-center gap-2 pb-2" },
