@@ -961,38 +961,7 @@
             useEffect(() => {
                 if (isPlaying) {
                     const line = sections[currentSection].lines[currentLine];
-if (!isMyRole(line)) {
-                    const sectionLines = sections[currentSection].lines;
-                        // isCueLine = STRICTEMENT la ligne juste avant le rôle sélectionné
-                    const isCueLine = turboMode && !!sectionLines[currentLine + 1] && isMyRole(sectionLines[currentLine + 1]);
-
-                        if (turboMode && !isCueLine) {
-                            const cueIdx = findCueLineIndex(currentSection, currentLine);
-                            if (cueIdx !== null && cueIdx >= 0) {
-                                // Sauter à la cue line, le prochain useEffect appellera speak() avec isCueLine=true
-                                setCurrentLine(cueIdx);
-                            } else {
-                                // Plus de Président dans la section → sauter directement à la section suivante
-                                if (currentSection < sections.length - 1) {
-                                    const nextCueIdx = findCueLineIndex(currentSection + 1, -1);
-                                    if (nextCueIdx !== null && nextCueIdx >= 0) {
-                                        setCurrentSection(prev => prev + 1);
-                                        setCurrentLine(nextCueIdx);
-                                    } else {
-                                        setCurrentSection(prev => prev + 1);
-                                        setCurrentLine(0);
-                                    }
-                                } else {
-                                    setIsPlaying(false);
-                                }
-                            }
-                            return;
-                        }
-
-                        speak(line.text, line.gender, isCueLine);
-                    } else {
-                        setIsPlaying(false);
-                    }
+                    speak(line.text, line.gender);
                 } else {
                     window.speechSynthesis.cancel();
                 }
