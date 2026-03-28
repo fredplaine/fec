@@ -109,6 +109,7 @@
             const presidentChunkIndexRef = useRef(0);
             const presidentTimeoutRef = useRef(null);
             const presidentSpeechOptsRef = useRef(null);
+            const lastTapTimeRef = useRef(0);
             const [selectedRole, setSelectedRole] = useState('Le Président');
 
             // Charger les paramètres sauvegardés
@@ -660,6 +661,38 @@
                 speakPresidentFromChunk(chunks, 0, opts, () => setPresidentSpeechState('idle'));
             };
 
+            const handleTextTap = (text) => {
+                const now = Date.now();
+                const timeSinceLastTap = now - lastTapTimeRef.current;
+                lastTapTimeRef.current = now;
+
+                if (timeSinceLastTap < 300) {
+                    // Double-tap : reset au début de la réplique, texte reste visible
+                    window.speechSynthesis.cancel();
+                    if (presidentTimeoutRef.current) {
+                        clearTimeout(presidentTimeoutRef.current);
+                        presidentTimeoutRef.current = null;
+                    }
+                    // Reconstruire les chunks si nécessaire (cas idle sans lecture précédente)
+                    if (!presidentChunksRef.current) {
+                        const roleGender = sections.flatMap(s => s.lines).find(l => l.character === selectedRole)?.gender || 'male';
+                        const voiceKey = roleGender === 'female' ? 'FEMMES' : 'HOMMES';
+                        const opts = { voiceName: selectedVoices[voiceKey], pitch: roleGender === 'female' ? 1.1 : 0.75, rate: speechRate };
+                        const cleanText = text.replace(/\([^()]*\)/g, '').replace(/\s+/g, ' ').trim();
+                        if (!cleanText) return;
+                        const chunks = cleanText.match(/[^,;.!?:]+[.,;!?:]?/g) || [cleanText];
+                        presidentChunksRef.current = chunks;
+                        presidentSpeechOptsRef.current = opts;
+                    }
+                    presidentChunkIndexRef.current = 0;
+                    setPresidentSpeechState('paused');
+                    return;
+                }
+
+                // Simple tap : comportement normal (idle→play, playing→pause, paused→reprend)
+                speakPresidentLine(text);
+            };
+
             // Speak text while inserting pauses based on punctuation.
             // Comma/semicolon -> commaPause seconds, period/!/? -> sentencePause seconds
             // Fonctions pour les marque-pages
@@ -1145,13 +1178,13 @@ if (!isMyRole(line)) {
                                                 className: `cursor-pointer transition-colors mobile-tap-area ${
                                                     prompterState === 'audio' ? 'text-green-300' : 'text-white hover:text-green-200'
                                                 }`,
-                                                onClick: showPrompter ? handlePrompterClick : () => speakPresidentLine(currentLineData.text),
+                                                onClick: showPrompter ? handlePrompterClick : () => handleTextTap(currentLineData.text),
                                                 title: showPrompter ? 
                                                     (prompterState === 'hidden' || prompterState === 'hint' ? 'Cliquer pour voir le texte complet' :
                                                      prompterState === 'full' ? 'Cliquer pour écouter' : 'Cliquer pour voir le texte') :
                                                     (presidentSpeechState === 'playing' ? 'Cliquer pour mettre en pause' :
                                                      presidentSpeechState === 'paused' ? 'Cliquer pour reprendre' :
-                                                     'Cliquer pour entendre')
+                                                     'Cliquer pour entendre · Double-tap pour reprendre depuis le début')
                                             }, 
                                                 showPrompter ? getPrompterText(currentLineData.text) : currentLineData.text
                                             ),
