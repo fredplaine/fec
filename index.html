@@ -893,10 +893,10 @@
                 }
                 
                 if (prompterState === 'hint') {
-                    // Afficher les cinq premiers mots + le reste masqué
+                    // Afficher les sept premiers mots + le reste masqué
                     const words = text.split(' ');
-                    if (words.length <= 5) return text;
-                    return words.slice(0, 5).join(' ') + ' ...';
+                    if (words.length <= 7) return text;
+                    return words.slice(0, 7).join(' ') + ' ...';
                 }
                 
                 // 'full' ou 'audio' : afficher le texte complet
@@ -1167,7 +1167,7 @@ if (!isMyRole(line)) {
                                             prompterState === 'audio' ? React.createElement(Volume2Icon) : React.createElement(EyeIcon),
                                             React.createElement('span', { className: "text-xs text-green-300" },
                                                 prompterState === 'hidden' ? `Indice dans ${prompterTimer}s` :
-                                                prompterState === 'hint' ? 'Indice : 2 premiers mots' :
+                                                prompterState === 'hint' ? 'Indice : 7 premiers mots' :
                                                 prompterState === 'audio' ? 'Lecture en cours' : 'Texte complet'
                                             )
                                         )

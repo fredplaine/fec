@@ -160,13 +160,13 @@ Le souffleur s'active via le bouton 👁️. Il ne fonctionne que pour la répli
 | État | Comportement affiché |
 |------|----------------------|
 | `'hidden'` | `...` + compteur "Indice dans Xs" |
-| `'hint'` | 5 premiers mots + `...` |
+| `'hint'` | 7 premiers mots + `...` |
 | `'full'` | Texte complet visible |
 | `'audio'` | Texte complet + lecture en cours |
 
 ### `getPrompterText(text)`
 - `'hidden'` ou `!showPrompter` → retourne `'...'`
-- `'hint'` → `words.slice(0, 5).join(' ') + ' ...'` (5 premiers mots)
+- `'hint'` → `words.slice(0, 7).join(' ') + ' ...'` (7 premiers mots)
 - `'full'` ou `'audio'` → texte complet
 
 ### `handlePrompterClick()`
