@@ -893,10 +893,10 @@
                 }
                 
                 if (prompterState === 'hint') {
-                    // Afficher les deux premiers mots + le reste masqué
+                    // Afficher les cinq premiers mots + le reste masqué
                     const words = text.split(' ');
-                    if (words.length <= 2) return text;
-                    return words.slice(0, 2).join(' ') + ' ...';
+                    if (words.length <= 5) return text;
+                    return words.slice(0, 5).join(' ') + ' ...';
                 }
                 
                 // 'full' ou 'audio' : afficher le texte complet
